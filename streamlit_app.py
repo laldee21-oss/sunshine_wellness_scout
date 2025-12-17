@@ -3,76 +3,45 @@ import requests
 from openai import OpenAI
 import re
 
-# Initialize session state for persistent email status
+# Initialize session state
 if "email_status" not in st.session_state:
     st.session_state.email_status = None
     st.session_state.email_message = ""
 
-# === API KEYS FROM SECRETS ONLY ===
+# Secrets
 XAI_API_KEY = st.secrets["XAI_API_KEY"]
 RESEND_API_KEY = st.secrets["RESEND_API_KEY"]
 YOUR_EMAIL = st.secrets["YOUR_EMAIL"]
 
-client = OpenAI(
-    api_key=XAI_API_KEY,
-    base_url="https://api.x.ai/v1"
-)
+client = OpenAI(api_key=XAI_API_KEY, base_url="https://api.x.ai/v1")
 
-# === Florida-themed CSS ===
+# Florida-themed CSS
 st.markdown("""
 <style>
     .stApp {
-        background: linear-gradient(to bottom, #ffecd2, #fcb69f);  /* Soft sunrise gradient */
-        color: #0c4a6e;  /* Deep ocean text */
+        background: linear-gradient(to bottom, #ffecd2, #fcb69f);
+        color: #0c4a6e;
     }
-    .main-header {
-        font-size: 3rem;
-        color: #ea580c;  /* Vibrant orange */
-        text-align: center;
-        text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
-    }
-    .tagline {
-        font-size: 1.8rem;
-        color: #166534;  /* Palm green */
-        text-align: center;
-        font-style: italic;
-        margin-bottom: 2rem;
-    }
-    .stButton>button {
-        background-color: #ea580c;
-        color: white;
-        border-radius: 12px;
-        font-weight: bold;
-    }
-    .stTextInput>div>div>input, .stTextArea>div>div>textarea {
-        background-color: rgba(255,255,255,0.9);
-    }
+    .main-header { font-size: 3rem; color: #ea580c; text-align: center; text-shadow: 2px 2px 4px rgba(0,0,0,0.2); }
+    .tagline { font-size: 1.8rem; color: #166534; text-align: center; font-style: italic; margin-bottom: 2rem; }
+    .stButton>button { background-color: #ea580c; color: white; border-radius: 12px; font-weight: bold; }
 </style>
 """, unsafe_allow_html=True)
 
-# Hero image: Your uploaded sunset waterfront path with biker and palms
-st.image("https://grok.x.ai/image/upload/user_upload/your_uploaded_sunset_path_biker_image.jpg", use_column_width=True, caption="Your Florida Longevity Lifestyle Awaits")
+# Hero: Sunset waterfront path with palms and biking vibe
+st.image("https://dynamic-media-cdn.tripadvisor.com/media/photo-o/11/a4/05/72/plenty-of-places-to-drive.jpg?w=1200&h=-1&s=1", use_column_width=True, caption="Your Florida Longevity Lifestyle Awaits – Trails, Sunsets, and Active Living")
 
 st.markdown("<h1 class='main-header'>LBL Wellness Solutions</h1>", unsafe_allow_html=True)
 st.markdown("<p class='tagline'>Your Holistic Longevity Blueprint</p>", unsafe_allow_html=True)
 
 st.success("**This tool is completely free – no cost, no obligation!**")
+st.write("Discover Florida homes that support your active, wellness-focused lifestyle – trails, natural light, home gym space, waterfront access, and more.")
 
-st.write("""
-Discover Florida homes that support your active, wellness-focused lifestyle – trails, natural light, home gym space, waterfront access, and more.
-Get an instant free teaser – enter your info for the full personalized report emailed to you.
-""")
+# Outdoor wellness trail image
+st.image("https://gulfshorelife.com/downloads/29555/download/Outdoor%20Gym.jpeg?cb=378b29802a11152041d9d120723761d9&w=1920", use_column_width=True, caption="Year-round outdoor fitness and trails in the Sunshine State")
 
-# Outdoor wellness image (trails/active living)
-st.image("https://oversee.us/wp-content/uploads/2023/10/30a-beach-bike-path.jpg", caption="Year-round trails and outdoor wellness in Florida", use_column_width=True)
-
-# Input fields
-client_needs = st.text_area(
-    "Describe your dream wellness/active home in Florida",
-    height=220,
-    placeholder="Example: Active couple in our 40s, love trails and home workouts, need gym space, near nature, budget $500k..."
-)
-
+# Inputs
+client_needs = st.text_area("Describe your dream wellness/active home in Florida", height=220, placeholder="Example: Active couple in our 40s, love trails and home workouts, need gym space, near nature, budget $500k...")
 col1, col2 = st.columns(2)
 with col1:
     budget = st.number_input("Maximum budget ($)", min_value=100000, value=500000, step=10000)
@@ -133,11 +102,9 @@ if st.button("🔍 Show Me Free Teaser Matches", type="primary"):
                 st.caption(f"Technical note: {str(e)}")
                 st.stop()
 
-            # Reset email status
             st.session_state.email_status = None
             st.session_state.email_message = ""
 
-            # === TEASER BUILD ===
             teaser = "**Free Teaser – Here's a preview of your personalized Florida matches**\n\n"
 
             intro_match = re.search(r'### Introduction\s*(.*?)(###|$)', full_report, re.DOTALL | re.IGNORECASE)
@@ -174,10 +141,10 @@ if st.button("🔍 Show Me Free Teaser Matches", type="primary"):
             st.success("Here's your free teaser!")
             st.markdown(teaser)
 
-            # Modern Florida home image
-            st.image("https://photos.prod.cirrussystem.net/1345/87b5b2578644499ae245ac9c09fe3c1c/2565310842.jpeg", caption="Modern wellness homes with natural light and space for active living", use_column_width=True)
+            # Modern wellness home image
+            st.image("https://photos.prod.cirrussystem.net/1345/87b5b2578644499ae245ac9c09fe3c1c/2565310842.jpeg", use_column_width=True, caption="Modern Florida homes designed for wellness and longevity")
 
-            # === LEAD CAPTURE ===
+            # Lead capture
             st.markdown("### Get Your Full Free Report")
             st.info("Enter your info – the complete report will be emailed instantly (no spam).")
 
