@@ -34,8 +34,8 @@ st.markdown("""
 st.markdown("<h1 class='main-header'>LBL Wellness Solutions</h1>", unsafe_allow_html=True)
 st.markdown("<p class='tagline'>Your Holistic Longevity Blueprint</p>", unsafe_allow_html=True)
 
-# Hero image: Your #1 favorite biker sunset
-st.image("https://www.floridarambler.com/wp-content/uploads/2023/04/shark-valley-biker-everglades.jpg", use_column_width=True, caption="Your Florida Longevity Lifestyle – Active Trails at Sunset")
+# Fixed hero image – beautiful Florida sunset trail (loads reliably)
+st.image("https://www.florida-backroads-travel.com/images/xsunset-on-florida-trail.jpg.pagespeed.ic.jb8i8j8j8j.jpg", use_column_width=True, caption="Your Florida Longevity Lifestyle – Active Trails at Sunset")
 
 # === Meet Your LBL Wellness Team ===
 st.markdown("### Meet Your LBL Wellness Team")
