@@ -10,7 +10,7 @@ if "email_status" not in st.session_state:
 
 # === API KEYS FROM SECRETS ONLY ===
 XAI_API_KEY = st.secrets["XAI_API_KEY"]
-RESEND_API_KEY = st.secrets["RESEND_API_KEY"]
+RESEND_API_KEY = st.secrets["RESEND_API_KEY"]  # Keeping name for now – change to BREVO_API_KEY if switching
 YOUR_EMAIL = st.secrets["YOUR_EMAIL"]
 
 client = OpenAI(
@@ -18,22 +18,64 @@ client = OpenAI(
     base_url="https://api.x.ai/v1"
 )
 
-# Page setup
-st.set_page_config(page_title="Sunshine State Wellness Home Scout", page_icon="☀️", layout="centered")
-st.title("☀️ Sunshine State Wellness & Active Lifestyle Home Scout")
-st.markdown("*Find Florida homes that fit how you want to live – trails, gym space, natural light, and more*")
+# === Florida-themed visual enhancements ===
+st.markdown("""
+<style>
+    .stApp {
+        background: linear-gradient(to bottom, #ffecd2, #fcb69f);  /* Soft sunrise gradient */
+        color: #0c4a6e;  /* Deep ocean text */
+    }
+    .main-header {
+        font-size: 3rem;
+        color: #ea580c;  /* Vibrant orange */
+        text-align: center;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+    }
+    .tagline {
+        font-size: 1.8rem;
+        color: #166534;  /* Palm green */
+        text-align: center;
+        font-style: italic;
+        margin-bottom: 2rem;
+    }
+    .section-title {
+        color: #ea580c;
+        border-bottom: 3px solid #166534;
+        padding-bottom: 0.5rem;
+    }
+    .stButton>button {
+        background-color: #ea580c;
+        color: white;
+        border-radius: 12px;
+        font-weight: bold;
+    }
+    .stTextInput>div>div>input, .stTextArea>div>div>textarea {
+        background-color: rgba(255,255,255,0.9);
+    }
+</style>
+""", unsafe_allow_html=True)
+
+# Hero image - Florida sunset
+st.image("https://thumbs.dreamstime.com/b/tropical-sunset-beach-scene-pier-palm-trees-vibrant-colors-serene-water-rocky-shore-ai-generated-356600072.jpg", use_column_width=True)
+st.markdown("<h1 class='main-header'>LBL Wellness Solutions</h1>", unsafe_allow_html=True)
+st.markdown("<p class='tagline'>Your Holistic Longevity Blueprint</p>", unsafe_allow_html=True)
+
+st.markdown("### Discover Your Florida Wellness Home")
 st.success("**This tool is completely free – no cost, no obligation!**")
 
 st.write("""
-Describe your ideal lifestyle, budget, and preferred area.
-Get an instant free teaser – enter your info for the full personalized report emailed to you.
+Find the perfect Florida home that supports your active, wellness-focused lifestyle – trails, natural light, home gym space, and more.
+Get an instant free teaser below, or enter your info for the full personalized report emailed instantly.
 """)
+
+# Wellness lifestyle image
+st.image("https://thebiostation.com/wp-content/uploads/2024/07/outdoor-fitness-scaled.jpg", caption="Year-round outdoor wellness in the Sunshine State", use_column_width=True)
 
 # Input fields
 client_needs = st.text_area(
-    "Describe your dream wellness/active home",
+    "Describe your dream wellness/active home in Florida",
     height=220,
-    placeholder="Example: Couple in 30s, love morning yoga & weight training, need home gym space, near trails, budget $450k..."
+    placeholder="Example: Active couple in our 40s, love trails and home workouts, need gym space, near nature, budget $500k..."
 )
 
 col1, col2 = st.columns(2)
@@ -46,7 +88,7 @@ if st.button("🔍 Show Me Free Teaser Matches", type="primary"):
     if not client_needs.strip():
         st.warning("Please describe your lifestyle needs above!")
     else:
-        with st.spinner("Grok is crafting your free teaser..."):
+        with st.spinner("Grok is crafting your personalized Florida longevity matches..."):
             full_prompt = f"""
             Client description:
             {client_needs}
@@ -87,7 +129,7 @@ if st.button("🔍 Show Me Free Teaser Matches", type="primary"):
                         {"role": "system", "content": "You are an expert Florida real estate advisor specializing in wellness and active lifestyle properties."},
                         {"role": "user", "content": full_prompt}
                     ],
-                    max_tokens=2000,  # Increased slightly for longer responses
+                    max_tokens=2000,
                     temperature=0.7
                 )
                 full_report = response.choices[0].message.content
@@ -96,34 +138,27 @@ if st.button("🔍 Show Me Free Teaser Matches", type="primary"):
                 st.caption(f"Technical note: {str(e)}")
                 st.stop()
 
-            # Reset email status when generating a new report
             st.session_state.email_status = None
             st.session_state.email_message = ""
 
-            # === BUILD TEASER ===
-            teaser = "**Free Teaser – Here's a preview of your personalized matches**\n\n"
+            teaser = "**Free Teaser – Here's a preview of your personalized Florida matches**\n\n"
 
-            # Introduction
             intro_match = re.search(r'### Introduction\s*(.*?)(###|$)', full_report, re.DOTALL | re.IGNORECASE)
             if intro_match:
                 teaser += intro_match.group(1).strip() + "\n\n"
 
-            # Top 2 Neighborhoods
             teaser += "**Top 2 Recommended Neighborhoods (of 5)**\n\n"
             neighborhoods_section = re.search(r'### Top 5 Neighborhoods.*?###', full_report, re.DOTALL | re.IGNORECASE)
             if neighborhoods_section:
-                # Primary: bracket format
                 bracket_matches = re.findall(r'(\d+\.\s*\[([^\]]+)\]\s*-\s*\[([^\]]+)\])', neighborhoods_section.group(0))[:2]
                 if bracket_matches:
                     for num, name, desc in bracket_matches:
                         teaser += f"**{num.strip()} {name.strip()}**\n{desc.strip()}\n\n"
                 else:
-                    # Fallback: any numbered line
                     plain_matches = re.findall(r'^\d+\.\s*(.+)', neighborhoods_section.group(0), re.MULTILINE)[:2]
                     for i, line in enumerate(plain_matches, 1):
                         teaser += f"**{i}. {line.strip()}**\n\n"
 
-            # Top 2 Must-Have Features
             teaser += "**Top 2 Must-Have Home Features (of 5)**\n\n"
             features_section = re.search(r'### Top 5 Must-Have Home Features.*?###', full_report, re.DOTALL | re.IGNORECASE)
             if features_section:
@@ -136,17 +171,17 @@ if st.button("🔍 Show Me Free Teaser Matches", type="primary"):
                     for i, line in enumerate(plain_matches, 1):
                         teaser += f"**{i}. {line.strip()}**\n\n"
 
-            # Wellness highlight
-            teaser += "**Wellness Teaser Highlight**\n"
-            teaser += "Year-round sunshine, extensive trail systems, waterfront access, and thriving fitness communities make this area ideal for your active lifestyle.\n\n"
-            teaser += "**This tool is completely free!** Get the **full in-depth report** with all 5 neighborhoods, features, and highlights – instantly emailed to you."
+            teaser += "**Wellness Teaser Highlight**\nYear-round sunshine, trails, and waterfront living await...\n\n"
+            teaser += "**Free tool!** Get the full report emailed instantly."
 
             st.success("Here's your free teaser!")
             st.markdown(teaser)
 
-            # === LEAD CAPTURE ===
+            # Modern Florida home image
+            st.image("https://www.pontevedrafocus.com/thumbs/1920x1080/webp/uploads/pool-home-hero%20%281%29.jpg", caption="Modern wellness homes with pools and natural light", use_column_width=True)
+
             st.markdown("### Get Your Full Free Report")
-            st.info("Enter your info below – the complete detailed report will be emailed instantly (no spam).")
+            st.info("Enter your info – the complete detailed report will be emailed instantly (no spam).")
 
             with st.form("lead_form"):
                 name = st.text_input("Your Name")
@@ -156,26 +191,26 @@ if st.button("🔍 Show Me Free Teaser Matches", type="primary"):
 
                 if submitted:
                     if not email:
-                        st.error("Email is required for the report!")
+                        st.error("Email is required!")
                     else:
                         data = {
                             "from": "onboarding@resend.dev",
                             "to": [email],
                             "cc": [YOUR_EMAIL],
-                            "subject": f"{name}'s Personalized Sunshine State Wellness Home Report",
+                            "subject": f"{name}'s LBL Wellness Home Report",
                             "text": f"""
 Hi {name},
 
-Thank you for using the Sunshine State Wellness Home Scout – it's 100% free!
+Thank you for exploring LBL Wellness Solutions – Your Holistic Longevity Blueprint.
 
-Here's your full personalized report based on your description:
+Here's your full personalized Florida wellness home report:
 
 {full_report}
 
-Feel free to reply if you'd like to discuss these recommendations further.
+Reply anytime to discuss how we can build your complete longevity plan.
 
 Best regards,
-Sunshine State Wellness Scout Team
+LBL Wellness Solutions Team
                             """
                         }
                         headers = {
@@ -186,15 +221,14 @@ Sunshine State Wellness Scout Team
                             response = requests.post("https://api.resend.com/emails", json=data, headers=headers)
                             if response.status_code == 200:
                                 st.session_state.email_status = "success"
-                                st.session_state.email_message = f"Full report successfully sent to {email}! Check your inbox (and spam folder)."
+                                st.session_state.email_message = f"Full report sent to {email}! Check your inbox."
                             else:
                                 st.session_state.email_status = "error"
-                                st.session_state.email_message = f"Email send failed (code {response.status_code}). Try again or contact support."
+                                st.session_state.email_message = f"Send failed: {response.text}"
                         except Exception as e:
                             st.session_state.email_status = "error"
                             st.session_state.email_message = f"Send error: {str(e)}"
 
-            # Persistent email status message
             if st.session_state.email_status == "success":
                 st.success(st.session_state.email_message)
                 st.balloons()
@@ -203,4 +237,4 @@ Sunshine State Wellness Scout Team
 
 # Footer
 st.markdown("---")
-st.markdown("<small>Powered by Grok (xAI) • Sunshine State Wellness Lifestyle Scout | Completely Free Tool<br>Real estate recommendations powered by Grok • Not affiliated with any brokerage</small>", unsafe_allow_html=True)
+st.markdown("<small>LBL Wellness Solutions • Your Holistic Longevity Blueprint<br>Powered by Grok (xAI) • Real estate recommendations powered by AI • Not affiliated with any brokerage</small>", unsafe_allow_html=True)
