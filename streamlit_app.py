@@ -17,11 +17,11 @@ YOUR_EMAIL = st.secrets["YOUR_EMAIL"]
 
 client = OpenAI(api_key=XAI_API_KEY, base_url="https://api.x.ai/v1")
 
-# Florida-themed CSS
+# Florida-themed CSS (sunrise gradient restored)
 st.markdown("""
 <style>
     .stApp {
-        background: linear_gradient(to bottom, #ffecd2, #fcb69f);
+        background: linear-gradient(to bottom, #ffecd2, #fcb69f);
         color: #0c4a6e;
     }
     .main-header { font-size: 3rem; color: #ea580c; text-align: center; text-shadow: 2px 2px 4px rgba(0,0,0,0.2); }
@@ -35,7 +35,7 @@ st.markdown("""
 st.markdown("<h1 class='main-header'>LBL Wellness Solutions</h1>", unsafe_allow_html=True)
 st.markdown("<p class='tagline'>Your Holistic Longevity Blueprint</p>", unsafe_allow_html=True)
 
-# Hero image - original reliable tropical sunset beach with pier and palms
+# Hero image - original reliable sunset beach
 st.image("https://thumbs.dreamstime.com/b/tropical-sunset-beach-scene-pier-palm-trees-vibrant-colors-serene-water-rocky-shore-ai-generated-356600072.jpg", use_column_width=True, caption="Your Florida Longevity Lifestyle – Active Trails at Sunset")
 
 # === Meet Your LBL Wellness Team ===
@@ -64,7 +64,7 @@ with cols[1]:
 with cols[2]:
     st.markdown("<div class='agent-card'>", unsafe_allow_html=True)
     st.markdown('<div class="bubble">Dr. Zoey Zoe</div>', unsafe_allow_html=True)
-    st.image("https://image.shutterstock.com/image-vector/cute-asian-female-doctor-cartoon-600w-2267904077.jpg", width=150)
+    st.image("https://image.shutterstock.com/image-vector/cute-african-american-female-doctor-600w-2267904077.jpg", width=150)  # Second one you liked — animated African American nurse
     st.markdown("*Health Assessor*  \nCompassionate wellness guide")
     if st.button("Talk to Dr. Zoey Zoe", key="zoey", use_container_width=True):
         st.session_state.selected_agent = "zoey"
