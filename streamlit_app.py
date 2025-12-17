@@ -28,8 +28,8 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# Hero: Sunset waterfront path with palms and biking vibe
-st.image("https://dynamic-media-cdn.tripadvisor.com/media/photo-o/11/a4/05/72/plenty-of-places-to-drive.jpg?w=1200&h=-1&s=1", use_column_width=True, caption="Your Florida Longevity Lifestyle Awaits – Trails, Sunsets, and Active Living")
+# Hero image: Option #1 – biker on sunset waterfront path with palms
+st.image("https://www.floridarambler.com/wp-content/uploads/2023/04/shark-valley-biker-everglades.jpg", use_column_width=True, caption="Your Florida Longevity Lifestyle – Active, Inspired, Endless Sunshine")
 
 st.markdown("<h1 class='main-header'>LBL Wellness Solutions</h1>", unsafe_allow_html=True)
 st.markdown("<p class='tagline'>Your Holistic Longevity Blueprint</p>", unsafe_allow_html=True)
@@ -37,8 +37,8 @@ st.markdown("<p class='tagline'>Your Holistic Longevity Blueprint</p>", unsafe_a
 st.success("**This tool is completely free – no cost, no obligation!**")
 st.write("Discover Florida homes that support your active, wellness-focused lifestyle – trails, natural light, home gym space, waterfront access, and more.")
 
-# Outdoor wellness trail image
-st.image("https://gulfshorelife.com/downloads/29555/download/Outdoor%20Gym.jpeg?cb=378b29802a11152041d9d120723761d9&w=1920", use_column_width=True, caption="Year-round outdoor fitness and trails in the Sunshine State")
+# Second image: Group of 6 people doing seated outdoor workout (original "sit upstairs" vibe)
+st.image("https://thebiostation.com/wp-content/uploads/2023/06/outdoor-group-exercise-class-scaled.jpg", use_column_width=True, caption="Community wellness and group fitness – part of your longevity blueprint")
 
 # Inputs
 client_needs = st.text_area("Describe your dream wellness/active home in Florida", height=220, placeholder="Example: Active couple in our 40s, love trails and home workouts, need gym space, near nature, budget $500k...")
@@ -141,8 +141,8 @@ if st.button("🔍 Show Me Free Teaser Matches", type="primary"):
             st.success("Here's your free teaser!")
             st.markdown(teaser)
 
-            # Modern wellness home image
-            st.image("https://photos.prod.cirrussystem.net/1345/87b5b2578644499ae245ac9c09fe3c1c/2565310842.jpeg", use_column_width=True, caption="Modern Florida homes designed for wellness and longevity")
+            # Modern wellness home image (optional third image)
+            st.image("https://photos.prod.cirrussystem.net/1345/87b5b2578644499ae245ac9c09fe3c1c/2565310842.jpeg", caption="Modern Florida homes designed for wellness and longevity", use_column_width=True)
 
             # Lead capture
             st.markdown("### Get Your Full Free Report")
