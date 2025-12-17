@@ -173,3 +173,4 @@ st.markdown("---")
 
 st.caption("Powered by Grok (xAI) • Sunshine State Wellness Lifestyle Scout | Completely Free Tool")
 
+
