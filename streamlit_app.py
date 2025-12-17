@@ -35,7 +35,7 @@ st.markdown("<h1 class='main-header'>LBL Wellness Solutions</h1>", unsafe_allow_
 st.markdown("<p class='tagline'>Your Holistic Longevity Blueprint</p>", unsafe_allow_html=True)
 
 # Hero image: Your #1 favorite – biker on sunset waterfront path
-st.image("https://www.floridarambler.com/wp-content/uploads/2023/04/shark-valley-biker-everglades.jpg", use_column_width=True, caption="Active Florida Living – Trails, Sunsets, and Longevity")
+st.image("https://www.floridarambler.com/wp-content/uploads/2023/04/shark-valley-biker-everglades.jpg", use_column_width=True, caption="Your Florida Longevity Lifestyle – Active Trails at Sunset")
 
 # === Meet The Team ===
 st.markdown("### Meet Your LBL Wellness Team")
@@ -68,7 +68,7 @@ if st.session_state.selected_agent == "fred":
     st.success("**This tool is completely free – no cost, no obligation!**")
     st.write("Find the perfect Florida home that supports trails, natural light, home gym space, and active living.")
 
-    # Group fitness image (your second favorite)
+    # Group fitness image
     st.image("https://thebiostation.com/wp-content/uploads/2023/06/outdoor-group-exercise-class-scaled.jpg", use_column_width=True, caption="Community wellness – part of your Florida longevity lifestyle")
 
     client_needs = st.text_area("Describe your dream wellness/active home in Florida", height=220, placeholder="Example: Active couple in our 40s, love trails and home workouts, need gym space, near nature, budget $500k...")
@@ -181,14 +181,95 @@ if st.session_state.selected_agent == "fred":
                         if not email:
                             st.error("Email required!")
                         else:
-                            # Email logic same as before
+                            data = {
+                                "from": "onboarding@resend.dev",
+                                "to": [email],
+                                "cc": [YOUR_EMAIL],
+                                "subject": f"{name}'s LBL Wellness Home Report",
+                                "text": f"""
+Hi {name},
 
-if st.session_state.selected_agent == "greg":
+Thank you for exploring LBL Wellness Solutions – Your Holistic Longevity Blueprint.
+
+Here's your full personalized Florida wellness home report:
+
+{full_report}
+
+Reply anytime to discuss how we can build your complete longevity plan.
+
+Best regards,
+Fred & the LBL Team
+                                """
+                            }
+                            headers = {
+                                "Authorization": f"Bearer {RESEND_API_KEY}",
+                                "Content-Type": "application/json"
+                            }
+                            try:
+                                response = requests.post("https://api.resend.com/emails", json=data, headers=headers)
+                                if response.status_code == 200:
+                                    st.session_state.email_status = "success"
+                                    st.session_state.email_message = f"Full report sent to {email}! Check your inbox."
+                                else:
+                                    st.session_state.email_status = "error"
+                                    st.session_state.email_message = f"Send failed: {response.text}"
+                            except Exception as e:
+                                st.session_state.email_status = "error"
+                                st.session_state.email_message = f"Send error: {str(e)}"
+
+                if st.session_state.email_status == "success":
+                    st.success(st.session_state.email_message)
+                    st.balloons()
+                elif st.session_state.email_status == "error":
+                    st.error(st.session_state.email_message)
+
+elif st.session_state.selected_agent == "greg":
     st.markdown("### 💪 Greg – Your Personal Trainer")
     st.write("Motivated gym rat helping you build strength, endurance, and longevity.")
 
-    # Personal Trainer inputs and Grok plan (same as previous version)
+    age = st.slider("Your age", 18, 80, 45)
+    fitness_level = st.selectbox("Current fitness level", ["Beginner", "Intermediate", "Advanced"])
+    goals = st.multiselect("Primary goals", ["Build strength", "Improve endurance", "Lose fat", "Gain muscle", "Increase flexibility", "Better mobility", "General wellness"])
+    equipment = st.multiselect("Available equipment", ["None (bodyweight only)", "Dumbbells", "Resistance bands", "Kettlebell", "Pull-up bar", "Stability ball", "Full home gym"])
+    injuries = st.text_area("Any injuries or limitations? (optional)")
+    days_per_week = st.slider("Days per week you can train", 1, 7, 4)
+    session_length = st.selectbox("Preferred session length", ["20-30 minutes", "30-45 minutes", "45-60 minutes"])
+
+    if st.button("Generate My Custom Workout Plan", type="primary"):
+        with st.spinner("Greg is building your plan..."):
+            trainer_prompt = f"""
+            You are Greg, a motivated gym rat and certified personal trainer focused on longevity.
+
+            Client: Age {age}, {fitness_level} level, goals: {', '.join(goals)}
+            Equipment: {', '.join(equipment) or 'Bodyweight'}
+            Injuries: {injuries or 'None'}
+            Training {days_per_week} days/week, {session_length} sessions
+
+            Create a full weekly workout plan in markdown:
+            - Warm-up
+            - Main exercises (sets, reps, rest)
+            - Cool-down
+            - Progression tips
+            Be encouraging and safe.
+            """
+
+            try:
+                response = client.chat.completions.create(
+                    model="grok-4-1-fast-reasoning",
+                    messages=[
+                        {"role": "system", "content": "You are Greg, a motivated personal trainer."},
+                        {"role": "user", "content": trainer_prompt}
+                    ],
+                    max_tokens=1500,
+                    temperature=0.7
+                )
+                plan = response.choices[0].message.content
+                st.success("Greg's custom plan for you!")
+                st.markdown(plan)
+            except Exception as e:
+                st.error("Greg is pumping iron... try again soon.")
+                st.caption(f"Note: {str(e)}")
 
 # Footer
 st.markdown("---")
-st.markdown("<small>LBL Wellness Solutions • Your Holistic Longevity Blueprint<br>Powered by Grok (xAI)</small>", unsafe_allow_html=True)
+st.markdown("<small>LBL Wellness Solutions • Your Holistic Longevity Blueprint<br>Powered by Grok (xAI) • Personalized wellness powered by AI</small>", unsafe_allow_html=True)
