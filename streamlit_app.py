@@ -63,7 +63,6 @@ st.markdown("### Meet Your LBL Lifestyle Team")
 cols = st.columns(3)
 
 with cols[0]:
-    st.markdown("<div class='agent-card'>", unsafe_allow_html=True)
     st.markdown("<div class='agent-name'>Fred</div>", unsafe_allow_html=True)
     st.image("https://i.postimg.cc/MGxQfXtd/austin-distel-h1RW-NFt-Uyc-unsplash.jpg", width=150)
     st.markdown("*Wellness Home Scout*  \nProfessional goal-focused realtor")
@@ -348,4 +347,5 @@ elif st.session_state.selected_agent == "zoey":
 # Footer
 st.markdown("---")
 st.markdown("<small>LBL Lifestyle Solutions • Your Holistic Longevity Blueprint<br>Powered by Grok (xAI) • Personalized wellness powered by AI</small>", unsafe_allow_html=True)
+
 
