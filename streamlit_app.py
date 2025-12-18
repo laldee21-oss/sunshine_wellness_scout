@@ -46,7 +46,7 @@ cols = st.columns(3)
 with cols[0]:
     st.markdown("<div class='agent-card'>", unsafe_allow_html=True)
     st.markdown('<div class="bubble">Fred</div>', unsafe_allow_html=True)
-    st.image("https://i.postimg.cc/MGxQfXtd/austin-distel-h1RW-NFt-Uyc-unsplash.jpg", width=150)  # Fred - professional realtor on phone
+    st.image("https://i.postimg.cc/MGxQfXtd/austin-distel-h1RW-NFt-Uyc-unsplash.jpg", width=150)  # Fred
     st.markdown("*Wellness Home Scout*  \nProfessional goal-focused realtor")
     if st.button("Talk to Fred", key="fred", use_container_width=True):
         st.session_state.selected_agent = "fred"
@@ -55,7 +55,7 @@ with cols[0]:
 with cols[1]:
     st.markdown("<div class='agent-card'>", unsafe_allow_html=True)
     st.markdown('<div class="bubble">Greg</div>', unsafe_allow_html=True)
-    st.image("https://i.postimg.cc/GhWYrXDb/nexa-black-VZMBIwwc49E-unsplash.jpg", width=150)  # Greg - strong Black personal trainer
+    st.image("https://i.postimg.cc/xC8yqc1j/vitaly-gariev-r-D0po-Llu57M-unsplash.jpg", width=150)  # New Greg photo
     st.markdown("*Personal Trainer*  \nMotivated gym rat")
     if st.button("Talk to Greg", key="greg", use_container_width=True):
         st.session_state.selected_agent = "greg"
@@ -64,7 +64,7 @@ with cols[1]:
 with cols[2]:
     st.markdown("<div class='agent-card'>", unsafe_allow_html=True)
     st.markdown('<div class="bubble">Dr. Zoey Zoe</div>', unsafe_allow_html=True)
-    st.image("https://images.pexels.com/photos/5215021/pexels-photo-5215021.jpeg", width=150)  # Dr. Zoey Zoe - professional Asian female doctor
+    st.image("https://images.pexels.com/photos/5215021/pexels-photo-5215021.jpeg", width=150)  # Dr. Zoey Zoe (reliable)
     st.markdown("*Health Assessor*  \nCompassionate wellness guide")
     if st.button("Talk to Dr. Zoey Zoe", key="zoey", use_container_width=True):
         st.session_state.selected_agent = "zoey"
