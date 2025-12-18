@@ -4,7 +4,7 @@ from openai import OpenAI
 import re
 
 # Initialize session state
-if "email_status" not st.session_state:
+if "email_status" not in st.session_state:
     st.session_state.email_status = None
     st.session_state.email_message = ""
 if "selected_agent" not in st.session_state:
@@ -17,7 +17,7 @@ YOUR_EMAIL = st.secrets["YOUR_EMAIL"]
 
 client = OpenAI(api_key=XAI_API_KEY, base_url="https://api.x.ai/v1")
 
-# CSS
+# Florida-themed CSS
 st.markdown("""
 <style>
     .stApp {
@@ -35,10 +35,10 @@ st.markdown("""
 st.markdown("<h1 class='main-header'>LBL Lifestyle Solutions</h1>", unsafe_allow_html=True)
 st.markdown("<p class='tagline'>Your Holistic Longevity Blueprint</p>", unsafe_allow_html=True)
 
-# Hero image - Florida beach sunset with palms (reliable Unsplash)
+# Hero image - reliable Florida beach sunset with palms
 st.image("https://images.unsplash.com/photo-1507525428034-b723cf961d3e", use_column_width=True, caption="Your Florida Longevity Lifestyle – Active Trails at Sunset")
 
-# Meet the Team
+# === Meet Your LBL Lifestyle Team ===
 st.markdown("### Meet Your LBL Lifestyle Team")
 
 cols = st.columns(3)
@@ -64,7 +64,7 @@ with cols[1]:
 with cols[2]:
     st.markdown("<div class='agent-card'>", unsafe_allow_html=True)
     st.markdown('<div class="bubble">Dr. Zoey Zoe</div>', unsafe_allow_html=True)
-    st.image("https://images.pexels.com/photos/5215021/pexels-photo-5215021.jpeg", width=150)  # Reliable Asian female doctor
+    st.image("https://images.pexels.com/photos/5215021/pexels-photo-5215021.jpeg", width=150)
     st.markdown("*Health Assessor*  \nCompassionate wellness guide")
     if st.button("Talk to Dr. Zoey Zoe", key="zoey", use_container_width=True):
         st.session_state.selected_agent = "zoey"
