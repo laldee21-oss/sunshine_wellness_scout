@@ -88,7 +88,7 @@ st.markdown("<p class='tagline'>LIVE BETTER LONGER</p>", unsafe_allow_html=True)
 # Hero image
 st.image("https://i.postimg.cc/tgsgw1dW/image.jpg", use_column_width=True, caption="Your Longevity Blueprint")
 
-# === NEW: Motivating Summary Section ===
+# === Motivating Summary Section ===
 st.markdown("<h2 class='motivation-header'>Unlock Your Vibrant Longevity Lifestyle Today!</h2>", unsafe_allow_html=True)
 st.markdown("""
 <div class='motivation-text'>
@@ -127,7 +127,7 @@ with cols[2]:
 
 st.markdown("---")
 
-# Model name - current reasoning model (Dec 2025)
+# Model name - current reasoning model
 MODEL_NAME = "grok-4-1-fast-reasoning"
 
 # === Agent Content ===
@@ -332,4 +332,29 @@ elif st.session_state.selected_agent == "zoey":
                 Give educational insights only. Use phrases like "Based on standard guidelines..." Do not diagnose.
                 Structure:
                 ### Key Insights
-                - Bullet
+                - Bullet points
+                ### General Recommendations
+                - Lifestyle tips
+                ### Next Steps
+                - Suggest consulting a professional
+                """
+                try:
+                    response = client.chat.completions.create(
+                        model=MODEL_NAME,
+                        messages=[
+                            {"role": "system", "content": "You are Dr. Zoey Zoe, a compassionate nurse."},
+                            {"role": "user", "content": zoey_prompt}
+                        ],
+                        max_tokens=1000,
+                        temperature=0.6
+                    )
+                    insights = response.choices[0].message.content
+                    st.success("Dr. Zoey Zoe's insights:")
+                    st.markdown(insights)
+                except Exception as e:
+                    st.error("Dr. Zoey Zoe is consulting... try again.")
+                    st.caption(f"Note: {str(e)}")
+
+# Footer
+st.markdown("---")
+st.markdown("<small>LBL Lifestyle Solutions • Your Holistic Longevity Blueprint<br>Powered by Grok (xAI) • Personalized wellness powered by AI</small>", unsafe_allow_html=True)
