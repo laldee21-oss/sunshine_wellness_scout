@@ -17,7 +17,7 @@ YOUR_EMAIL = st.secrets["YOUR_EMAIL"]
 
 client = OpenAI(api_key=XAI_API_KEY, base_url="https://api.x.ai/v1")
 
-# Florida-themed CSS
+# CSS
 st.markdown("""
 <style>
     .stApp {
@@ -35,7 +35,7 @@ st.markdown("""
 st.markdown("<h1 class='main-header'>LBL Lifestyle Solutions</h1>", unsafe_allow_html=True)
 st.markdown("<p class='tagline'>Your Holistic Longevity Blueprint</p>", unsafe_allow_html=True)
 
-# Hero image - reliable Florida beach sunset with palms
+# Hero image - reliable Florida beach sunset
 st.image("https://images.unsplash.com/photo-1507525428034-b723cf961d3e", use_column_width=True, caption="Your Florida Longevity Lifestyle – Active Trails at Sunset")
 
 # === Meet Your LBL Lifestyle Team ===
@@ -46,7 +46,7 @@ cols = st.columns(3)
 with cols[0]:
     st.markdown("<div class='agent-card'>", unsafe_allow_html=True)
     st.markdown('<div class="bubble">Fred</div>', unsafe_allow_html=True)
-    st.image("https://i.imgur.com/your_fred_image_link_here.jpg", width=150)  # Third attached photo (professional realtor)
+    st.image("https://i.postimg.cc/MGxQfXtd/austin-distel-h1RW-NFt-Uyc-unsplash.jpg", width=150)  # Your new Fred photo
     st.markdown("*Wellness Home Scout*  \nProfessional goal-focused realtor")
     if st.button("Talk to Fred", key="fred", use_container_width=True):
         st.session_state.selected_agent = "fred"
@@ -55,7 +55,7 @@ with cols[0]:
 with cols[1]:
     st.markdown("<div class='agent-card'>", unsafe_allow_html=True)
     st.markdown('<div class="bubble">Greg</div>', unsafe_allow_html=True)
-    st.image("https://i.imgur.com/your_greg_image_link_here.jpg", width=150)  # Second attached photo (strong trainer)
+    st.image("https://images.pexels.com/photos/6454088/pexels-photo-6454088.jpeg", width=150)  # Strong trainer (reliable Pexels)
     st.markdown("*Personal Trainer*  \nMotivated gym rat")
     if st.button("Talk to Greg", key="greg", use_container_width=True):
         st.session_state.selected_agent = "greg"
@@ -64,7 +64,7 @@ with cols[1]:
 with cols[2]:
     st.markdown("<div class='agent-card'>", unsafe_allow_html=True)
     st.markdown('<div class="bubble">Dr. Zoey Zoe</div>', unsafe_allow_html=True)
-    st.image("https://i.imgur.com/your_zoey_image_link_here.jpg", width=150)  # First attached photo (Asian doctor)
+    st.image("https://images.pexels.com/photos/5215021/pexels-photo-5215021.jpeg", width=150)  # Asian female doctor (reliable Pexels)
     st.markdown("*Health Assessor*  \nCompassionate wellness guide")
     if st.button("Talk to Dr. Zoey Zoe", key="zoey", use_container_width=True):
         st.session_state.selected_agent = "zoey"
@@ -73,8 +73,14 @@ with cols[2]:
 st.markdown("---")
 
 # === Agent Content ===
-# (Full Grok-powered code for Fred, Greg, Dr. Zoey Zoe as before)
+if st.session_state.selected_agent == "fred":
+    st.markdown("### 🏡 Fred – Your Wellness Home Scout")
+    st.success("**This tool is completely free – no cost, no obligation!**")
+    st.write("Find the perfect Florida home that supports trails, natural light, home gym space, and active living.")
 
-# Footer
-st.markdown("---")
-st.markdown("<small>LBL Lifestyle Solutions • Your Holistic Longevity Blueprint<br>Powered by Grok (xAI) • Personalized wellness powered by AI</small>", unsafe_allow_html=True)
+    st.image("https://thebiostation.com/wp-content/uploads/2023/06/outdoor-group-exercise-class-scaled.jpg", use_column_width=True, caption="Community wellness – part of your Florida longevity lifestyle")
+
+    # (full Fred code...)
+
+elif st.session_state.selected_agent == "greg":
+    st.markdown("### 💪 Greg – Your Personal Trainer")
