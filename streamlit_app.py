@@ -17,7 +17,7 @@ YOUR_EMAIL = st.secrets["YOUR_EMAIL"]
 
 client = OpenAI(api_key=XAI_API_KEY, base_url="https://api.x.ai/v1")
 
-# Florida-themed CSS
+# Florida-themed CSS - fixed alignment and removed extra bubbles
 st.markdown("""
 <style>
     .stApp {
@@ -26,16 +26,35 @@ st.markdown("""
     }
     .main-header { font-size: 3rem; color: #ea580c; text-align: center; text-shadow: 2px 2px 4px rgba(0,0,0,0.2); }
     .tagline { font-size: 1.8rem; color: #166534; text-align: center; font-style: italic; margin-bottom: 2rem; }
-    .agent-card { text-align: center; padding: 1.5rem; border-radius: 15px; background: rgba(255,255,255,0.9); box-shadow: 0 4px 8px rgba(0,0,0,0.1); margin: 10px; }
-    .bubble { background: white; border-radius: 20px; padding: 8px 15px; display: inline-block; margin-bottom: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); font-weight: bold; }
-    .stButton>button { background-color: #ea580c; color: white; border-radius: 12px; font-weight: bold; width: 100%; height: 3em; }
+    .agent-card { 
+        text-align: center; 
+        padding: 1.5rem; 
+        border-radius: 15px; 
+        background: rgba(255,255,255,0.9); 
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1); 
+        margin: 10px; 
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+    .agent-name { font-weight: bold; font-size: 1.2rem; margin-bottom: 10px; }
+    .stButton>button { 
+        background-color: #ea580c; 
+        color: white; 
+        border-radius: 12px; 
+        font-weight: bold; 
+        width: 100%; 
+        height: 3em; 
+        margin-top: auto;
+    }
 </style>
 """, unsafe_allow_html=True)
 
 st.markdown("<h1 class='main-header'>LBL Lifestyle Solutions</h1>", unsafe_allow_html=True)
 st.markdown("<p class='tagline'>Your Holistic Longevity Blueprint</p>", unsafe_allow_html=True)
 
-# Hero image - reliable Florida beach sunset with palms
+# Hero image - reliable Florida beach sunset
 st.image("https://images.unsplash.com/photo-1507525428034-b723cf961d3e", use_column_width=True, caption="Your Florida Longevity Lifestyle – Active Trails at Sunset")
 
 # === Meet Your LBL Lifestyle Team ===
@@ -45,8 +64,8 @@ cols = st.columns(3)
 
 with cols[0]:
     st.markdown("<div class='agent-card'>", unsafe_allow_html=True)
-    st.markdown('<div class="bubble">Fred</div>', unsafe_allow_html=True)
-    st.image("https://i.postimg.cc/MGxQfXtd/austin-distel-h1RW-NFt-Uyc-unsplash.jpg", width=150)  # Fred
+    st.markdown("<div class='agent-name'>Fred</div>", unsafe_allow_html=True)
+    st.image("https://i.postimg.cc/MGxQfXtd/austin-distel-h1RW-NFt-Uyc-unsplash.jpg", width=150)
     st.markdown("*Wellness Home Scout*  \nProfessional goal-focused realtor")
     if st.button("Talk to Fred", key="fred", use_container_width=True):
         st.session_state.selected_agent = "fred"
@@ -54,8 +73,8 @@ with cols[0]:
 
 with cols[1]:
     st.markdown("<div class='agent-card'>", unsafe_allow_html=True)
-    st.markdown('<div class="bubble">Greg</div>', unsafe_allow_html=True)
-    st.image("https://i.postimg.cc/xC8yqc1j/vitaly-gariev-r-D0po-Llu57M-unsplash.jpg", width=150)  # New Greg photo
+    st.markdown("<div class='agent-name'>Greg</div>", unsafe_allow_html=True)
+    st.image("https://i.postimg.cc/xC8yqc1j/vitaly-gariev-r-D0po-Llu57M-unsplash.jpg", width=150)
     st.markdown("*Personal Trainer*  \nMotivated gym rat")
     if st.button("Talk to Greg", key="greg", use_container_width=True):
         st.session_state.selected_agent = "greg"
@@ -63,8 +82,8 @@ with cols[1]:
 
 with cols[2]:
     st.markdown("<div class='agent-card'>", unsafe_allow_html=True)
-    st.markdown('<div class="bubble">Dr. Zoey Zoe</div>', unsafe_allow_html=True)
-    st.image("https://images.pexels.com/photos/5215021/pexels-photo-5215021.jpeg", width=150)  # Dr. Zoey Zoe (reliable)
+    st.markdown("<div class='agent-name'>Dr. Zoey Zoe</div>", unsafe_allow_html=True)
+    st.image("https://images.pexels.com/photos/5215021/pexels-photo-5215021.jpeg", width=150)
     st.markdown("*Health Assessor*  \nCompassionate wellness guide")
     if st.button("Talk to Dr. Zoey Zoe", key="zoey", use_container_width=True):
         st.session_state.selected_agent = "zoey"
