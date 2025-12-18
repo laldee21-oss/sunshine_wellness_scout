@@ -249,11 +249,11 @@ Fred & the LBL Team
                     st.error(st.session_state.email_message)
 
 elif st.session_state.selected_agent == "greg":
-    st.markdown("### 💪 HI!!! IM GREG – Your Personal Trainer")
-    st.write("Motivated gym rat helping you build strength, endurance, and longevity. Lets get started by building you a personalized workout routine. Please fill out the form below. I will write up a plan that right for you. Congatulations on choosing a longevity lifestyle.  Your Tomorrow self will thank you")
+    st.markdown("### 💪 HI!!! IM GREG – Your Awesome Personal Trainer. GET SOME!!!!")
+    st.write("Im a motivated gym rat helping you build strength, endurance, and longevity. Lets get started by building you a personalized workout routine. Please fill out the form below. I will write up a plan that is right for you. Congatulations on choosing a longevity lifestyle.  Your tomorrow self will thank you")
 
     age = st.slider("Your age", 18, 80, 45)
-    fitness_level = st.selectbox("Current fitness level", ["Beginner", "Intermediate", "Advanced"])
+    fitness_level = st.selectbox("CURRENT FITNESS LEVEL", ["Beginner", "Intermediate", "Advanced"])
     goals = st.multiselect("Primary goals", ["Build strength", "Improve endurance", "Lose fat", "Gain muscle", "Increase flexibility", "Better mobility", "General wellness"])
     equipment = st.multiselect("Available equipment", ["None (bodyweight only)", "Dumbbells", "Resistance bands", "Kettlebell", "Pull-up bar", "Stability ball", "Full home gym", "Community gym free weights", "Community gym resistance machines"])
     injuries = st.text_area("Any injuries or limitations? (optional)")
@@ -345,6 +345,7 @@ elif st.session_state.selected_agent == "zoey":
 # Footer
 st.markdown("---")
 st.markdown("<small>LBL Lifestyle Solutions • Your Holistic Longevity Blueprint<br>Powered by Grok (xAI) • Personalized wellness powered by AI</small>", unsafe_allow_html=True)
+
 
 
 
