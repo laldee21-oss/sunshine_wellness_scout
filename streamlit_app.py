@@ -1,5 +1,3 @@
-# streamlit_app.py (Main Home / Team Selection Page)
-
 import streamlit as st
 
 # CSS
@@ -19,10 +17,8 @@ st.markdown("""
 st.markdown("<h1 class='main-header'>LBL LIFESTYLE SOLUTIONS</h1>", unsafe_allow_html=True)
 st.markdown("<p class='tagline'>LIVE BETTER LONGER</p>", unsafe_allow_html=True)
 
-# Hero image
 st.image("https://i.postimg.cc/tgsgw1dW/image.jpg", use_column_width=True, caption="Your Longevity Blueprint")
 
-# Onboarding
 st.markdown("<h2 class='motivation-header'>How It Works – 3 Simple Steps</h2>", unsafe_allow_html=True)
 st.markdown("""
 <div class='motivation-text'>
@@ -43,21 +39,24 @@ with cols[0]:
     st.image("https://i.postimg.cc/MGxQfXtd/austin-distel-h1RW-NFt-Uyc-unsplash.jpg", width=200)
     st.markdown("<div class='agent-desc'>*YOUR WELLNESS HOME SCOUT* <br>A goal-focused realtor. Lets start by generating a detailed report of home options that match your lifestyle needs — anywhere in the U.S.!</div>", unsafe_allow_html=True)
     if st.button("Talk to Fred →", key="fred"):
-        st.switch_page("pages/fred.py")
+        st.session_state.selected_agent = "fred"
+        st.rerun()
 
 with cols[1]:
     st.markdown("<div class='agent-name'>GREG</div>", unsafe_allow_html=True)
     st.image("https://i.postimg.cc/yxf3Szvc/pexels-andres-ayrton-6551079.jpg", width=200)
     st.markdown("<div class='agent-desc'>*YOUR PERSONAL TRAINER* <br>A motivated lifestyle coach. Let start with a workout routine tailored to your fitness goals and health needs to Live Better Longer.</div>", unsafe_allow_html=True)
     if st.button("Talk to Greg →", key="greg"):
-        st.switch_page("pages/greg.py")
+        st.session_state.selected_agent = "greg"
+        st.rerun()
 
 with cols[2]:
     st.markdown("<div class='agent-name'>NURSE ZOEY ZOE</div>", unsafe_allow_html=True)
     st.image("https://images.pexels.com/photos/5215021/pexels-photo-5215021.jpeg", width=200)
     st.markdown("<div class='agent-desc'>*YOUR HEALTH ASSESSOR* <br>A compassionate wellness guide. Ask Zoey any health question. She can help you develop a proactive health lifestyle</div>", unsafe_allow_html=True)
     if st.button("Talk to Nurse Zoey Zoe →", key="zoey"):
-        st.switch_page("pages/nurse_zoey_zoe.py")
+        st.session_state.selected_agent = "zoey"
+        st.rerun()
 
 st.markdown("---")
 st.markdown("<small>LBL Lifestyle Solutions • Your Holistic Longevity Blueprint<br>Powered by Grok (xAI) • Personalized wellness powered by AI</small>", unsafe_allow_html=True)
