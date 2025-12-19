@@ -1,3 +1,5 @@
+# pages/greg.py (Greg's Dedicated Page)
+
 import streamlit as st
 from openai import OpenAI
 
@@ -18,17 +20,15 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# Back button
-st.page_link("streamlit_app.py", label="← Back to Team")
+# Back to home
+st.button("← Back to Team", on_click=lambda: st.switch_page("streamlit_app.py"))
 
 # Hero image
 st.image("https://i.postimg.cc/mDy2FKQg/outdoor-fitness-scaled.webp", use_column_width=True, caption="Greatness Await – Welcome to your longevity lifestyle")
 
-# Greeting
 st.markdown("### 💪 HI!!! IM GREG – Your Awesome Personal Trainer. GET SOME!!!!")
 st.write("Im a motivated gym rat helping you build strength, endurance, and longevity. Lets get started by building you a personalized workout routine. Please fill out the form below. I will write up a plan that is right for you. Congatulations on choosing a longevity lifestyle. Your tomorrow self will thank you")
 
-# Workout form
 age = st.slider("Your age", 18, 80, 45)
 fitness_level = st.selectbox("CURRENT FITNESS LEVEL", ["Beginner", "Intermediate", "Advanced"])
 goals = st.multiselect("PRIMARY GOALS", ["Build strength", "Improve endurance", "Lose fat", "Gain muscle", "Increase flexibility", "Better mobility", "General wellness"])
