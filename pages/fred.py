@@ -1,3 +1,5 @@
+# pages/fred.py (Fred's Dedicated Page)
+
 import streamlit as st
 import requests
 from openai import OpenAI
@@ -12,21 +14,26 @@ client = OpenAI(api_key=XAI_API_KEY, base_url="https://api.x.ai/v1")
 
 MODEL_NAME = "grok-4-1-fast-reasoning"
 
-# CSS (same as main)
+# CSS
 st.markdown("""
 <style>
     .stApp { background: linear-gradient(to bottom, #ffecd2, #fcb69f); color: #0c4a6e; }
     .stButton>button { background-color: #ea580c; color: white; border-radius: 15px; font-weight: bold; font-size: 1.2rem; height: 4em; width: 100%; }
+    .chat-container { margin-top: 3rem; padding: 1.5rem; background: rgba(255,255,255,0.9); border-radius: 15px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+    .user-message { background: #ea580c; color: white; padding: 12px; border-radius: 15px; margin: 8px 0; text-align: right; max-width: 80%; margin-left: auto; }
+    .assistant-message { background: #f0f0f0; color: #0c4a6e; padding: 12px; border-radius: 15px; margin: 8px 0; max-width: 80%; }
 </style>
 """, unsafe_allow_html=True)
 
-st.page_link("streamlit_app.py", label="← Back to Team")
+# Back to home
+st.button("← Back to Team", on_click=lambda: st.switch_page("streamlit_app.py"))
+
+# Hero image
+st.image("https://i.postimg.cc/fRms9xv6/tierra-mallorca-rg-J1J8SDEAY-unsplash.jpg", use_column_width=True, caption="Your Keys Await – Welcome to your longevity lifestyle")
 
 st.markdown("### 🏡 FRED – Your Wellness Home Scout")
 st.success("**This tool is completely free – no cost, no obligation! You will receive the full personalized report below and via email.**")
 st.write("The perfect home that supports your lifestyle awaits — anywhere in the U.S.!")
-
-st.image("https://i.postimg.cc/fRms9xv6/tierra-mallorca-rg-J1J8SDEAY-unsplash.jpg", use_column_width=True, caption="Your Keys Await – Welcome to your longevity lifestyle")
 
 client_needs = st.text_area("DESCRIBE YOUR DREAM WELLNESS NEEDS IN DETAIL. LET FRED DO THE REST!!!", height=220, placeholder="Example: Active couple in our 40s, love trails and home workouts, need gym space, near nature, budget $500k...")
 col1, col2 = st.columns(2)
@@ -126,7 +133,7 @@ Reply anytime to discuss how we can build your complete longevity plan.
 
 Best regards,
 Fred & the LBL Team
-                                """
+                            """
                         }
                         headers = {
                             "Authorization": f"Bearer {RESEND_API_KEY}",
@@ -135,22 +142,51 @@ Fred & the LBL Team
                         try:
                             response = requests.post("https://api.resend.com/emails", json=data, headers=headers)
                             if response.status_code == 200:
-                                st.session_state.email_status = "success"
-                                st.session_state.email_message = f"Full report sent to {email}! Check your inbox."
+                                st.success(f"Full report sent to {email}! Check your inbox.")
+                                st.balloons()
                             else:
-                                st.session_state.email_status = "error"
-                                st.session_state.email_message = f"Send failed: {response.text} (Status: {response.status_code})"
+                                st.error(f"Send failed: {response.text} (Status: {response.status_code})")
                         except Exception as e:
-                            st.session_state.email_status = "error"
-                            st.session_state.email_message = f"Send error: {str(e)}"
+                            st.error(f"Send error: {str(e)}")
 
-                if st.session_state.email_status == "success":
-                    st.success(st.session_state.email_message)
-                    st.balloons()
-                elif st.session_state.email_status == "error":
-                    st.error(st.session_state.email_message)
+# Chat Box
+st.markdown("### Have a follow-up question? Chat with me!")
+st.markdown("<div class='chat-container'>", unsafe_allow_html=True)
 
-# Chat box for Fred (same as before — add if you want, or keep separate)
+if "fred" not in st.session_state.chat_history:
+    st.session_state.chat_history["fred"] = []
 
+for msg in st.session_state.chat_history["fred"]:
+    if msg["role"] == "user":
+        st.markdown(f"<div class='user-message'>{msg['content']}</div>", unsafe_allow_html=True)
+    else:
+        st.markdown(f"<div class='assistant-message'>{msg['content']}</div>", unsafe_allow_html=True)
+
+if prompt := st.chat_input("Ask Fred a question..."):
+    st.session_state.chat_history["fred"].append({"role": "user", "content": prompt})
+    st.markdown(f"<div class='user-message'>{prompt}</div>", unsafe_allow_html=True)
+
+    with st.spinner("Thinking..."):
+        try:
+            response = client.chat.completions.create(
+                model=MODEL_NAME,
+                messages=[
+                    {"role": "system", "content": "You are Fred, a professional, goal-focused real estate advisor specializing in wellness homes across the U.S. Be friendly and enthusiastic. Only answer real estate/location questions. If asked about fitness or health, say: 'That's Greg's or Nurse Zoey Zoe's expertise — go chat with them!'"},
+                    *st.session_state.chat_history["fred"]
+                ],
+                max_tokens=800,
+                temperature=0.7
+            )
+            reply = response.choices[0].message.content
+            st.session_state.chat_history["fred"].append({"role": "assistant", "content": reply})
+            st.markdown(f"<div class='assistant-message'>{reply}</div>", unsafe_allow_html=True)
+        except Exception as e:
+            st.error("Sorry, I'm having trouble right now. Try again soon.")
+
+    st.rerun()
+
+st.markdown("</div>", unsafe_allow_html=True)
+
+# Footer
 st.markdown("---")
 st.markdown("<small>LBL Lifestyle Solutions • Your Holistic Longevity Blueprint<br>Powered by Grok (xAI) • Personalized wellness powered by AI</small>", unsafe_allow_html=True)
