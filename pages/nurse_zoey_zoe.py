@@ -1,3 +1,5 @@
+# pages/nurse_zoey_zoe.py (Nurse Zoey Zoe's Dedicated Page)
+
 import streamlit as st
 from openai import OpenAI
 
@@ -18,19 +20,17 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# Back button
-st.page_link("streamlit_app.py", label="← Back to Team")
+# Back to home
+st.button("← Back to Team", on_click=lambda: st.switch_page("streamlit_app.py"))
 
 # Hero image
 st.image("https://i.postimg.cc/BnFgfCTD/pexels-kampus-7551620.jpg", use_column_width=True, caption="LIVE BETTER LONGER – Welcome to your longevity lifestyle")
 
-# Greeting
 st.markdown("### 🩺 GREETINGS. IM NURSE ZOEY ZOE – your friendly nurse assistant, here to support you with compassionate and reliable guidance every step of the way. ")
 st.write("I can help you understand medical conditions, symptoms, treatments, and medications in simple, easy-to-follow terms; offer general advice on managing everyday health concerns like pain relief, wound care, or chronic issues such as diabetes or hypertension; provide tips for wellness, nutrition, exercise, and mental health support; explain procedures or post-care instructions; assist caregivers with practical strategies for supporting loved ones; and always listen with empathy to offer reassurance during stressful times—remember, though, I'm here for information and support, so please consult your healthcare provider for personalized advice or emergencies..")
 st.warning("**Important**: This is for educational purposes only. I do not provide medical diagnoses or treatment. Always consult a licensed healthcare professional.")
 st.write("Upload labs or enter data for general insights, or ask wellness questions.")
 
-# Insights form
 uploaded_file = st.file_uploader("Upload labs/health data (PDF, text)", type=["pdf", "txt"])
 health_data = st.text_area("Or enter data manually", height=150)
 question = st.text_input("General question (optional)")
