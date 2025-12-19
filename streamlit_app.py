@@ -145,11 +145,35 @@ if st.session_state.selected_agent == "fred":
     with col2:
         location = st.text_input("Preferred state or area (e.g., North Carolina, Asheville, Tampa FL)", value="")
 
+    st.markdown("### Refine Your Report (Optional)")
+    st.write("Choose what you'd like to focus on — or get the full report!")
+    report_sections = st.multiselect(
+        "Select sections to include:",
+        [
+            "Introduction summary",
+            "Top 5 Neighborhoods/Suburbs and Why They Fit (with fun facts)",
+            "Top 5 Must-Have Home Features",
+            "Wellness/Outdoor Highlights"
+        ],
+        default=["Top 5 Neighborhoods/Suburbs and Why They Fit (with fun facts)", "Top 5 Must-Have Home Features", "Wellness/Outdoor Highlights"]
+    )
+
     if st.button("🔍 GENERATE MY REPORT", type="primary"):
         if not client_needs.strip():
             st.warning("Please describe your lifestyle needs above!")
         else:
-            with st.spinner("Fred is finding your perfect matches..."):
+            with st.spinner("Fred is crafting your personalized report..."):
+                # Build dynamic prompt based on selections
+                sections_prompt = ""
+                if "Introduction summary" in report_sections:
+                    sections_prompt += "### Introduction\n5-6 sentences introducing how well their needs match the area and budget.\n\n"
+                if "Top 5 Neighborhoods/Suburbs and Why They Fit (with fun facts)" in report_sections:
+                    sections_prompt += "### Top 5 Neighborhoods/Suburbs and Why They Fit\n1. [Neighborhood Name Here] - [Detailed explanation: include specific trails/parks by name if possible, wellness amenities (gyms, yoga studios, community centers), community vibe, typical home styles available in this budget range, proximity to water/nature, and exactly how it supports their active lifestyle and home workout needs. 5-8 full sentences.] [Fun facts: weather trends, cost of living, safety, commute/transportation, healthcare, culture/lifestyle, and overall vibe of the neighborhood. 3-5 sentences.]\n# (repeat for 2-5)\n\n"
+                if "Top 5 Must-Have Home Features" in report_sections:
+                    sections_prompt += "### Top 5 Must-Have Home Features\n1. [Feature Name Here] - [In-depth reason why essential: explain daily benefits, health impact, real-life examples of use, and how it aligns with their wellness goals. 5-8 sentences.]\n# (repeat for 2-5)\n\n"
+                if "Wellness/Outdoor Highlights" in report_sections:
+                    sections_prompt += "### Wellness/Outdoor Highlights\n6-10 sentences covering key trails, parks, waterfront access, fitness communities, farmers markets, outdoor events, year-round climate advantages, and wellness resources in the region.\n\n"
+
                 full_prompt = f"""
                 Client description:
                 {client_needs}
@@ -158,30 +182,13 @@ if st.session_state.selected_agent == "fred":
 
                 You are Fred, a professional goal-focused real estate advisor specializing in wellness and active lifestyle properties across the United States.
 
-                Follow this EXACT structure with no deviations. Use the precise bracket format.
+                Follow this EXACT structure with no deviations. Only include the sections requested:
 
-                ### Introduction
-                5-6 sentences introducing how well their needs match the area and budget.
+                {sections_prompt}
 
-                ### Top 5 Neighborhoods/Suburbs and Why They Fit
-                1. [Neighborhood Name Here] - [Detailed explanation: include specific trails/parks by name if possible, wellness amenities (gyms, yoga studios, community centers), community vibe, typical home styles available in this budget range, proximity to water/nature, and exactly how it supports their active lifestyle and home workout needs. 5-8 full sentences.] [Fun facts: weather trends, cost of living, safety, commute/transportation, healthcare, culture/lifestyle, and overall vibe of the neighborhood. 3-5 sentences.]
-                2. [Neighborhood Name Here] - [Same level of depth and detail. 5-8 sentences.] [Fun facts: weather trends, cost of living, safety, commute/transportation, healthcare, culture/lifestyle, and overall vibe of the neighborhood. 3-5 sentences.]
-                3. [Neighborhood Name Here] - [Same level of depth and detail. 5-8 sentences.] [Fun facts: weather trends, cost of living, safety, commute/transportation, healthcare, culture/lifestyle, and overall vibe of the neighborhood. 3-5 sentences.]
-                4. [Neighborhood Name Here] - [Same level of depth and detail. 5-8 sentences.] [Fun facts: weather trends, cost of living, safety, commute/transportation, healthcare, culture/lifestyle, and overall vibe of the neighborhood. 3-5 sentences.]
-                5. [Neighborhood Name Here] - [Same level of depth and detail. 5-8 sentences.] [Fun facts: weather trends, cost of living, safety, commute/transportation, healthcare, culture/lifestyle, and overall vibe of the neighborhood. 3-5 sentences.]
-
-                ### Top 5 Must-Have Home Features
-                1. [Feature Name Here] - [In-depth reason why essential: explain daily benefits, health impact, real-life examples of use, and how it aligns with their wellness goals. 5-8 sentences.]
-                2. [Feature Name Here] - [Same depth and detail. 5-8 sentences.]
-                3. [Feature Name Here] - [Same depth and detail. 5-8 sentences.]
-                4. [Feature Name Here] - [Same depth and detail. 5-8 sentences.]
-                5. [Feature Name Here] - [Same depth and detail. 5-8 sentences.]
-
-                ### Wellness/Outdoor Highlights
-                6-10 sentences covering key trails, parks, waterfront access, fitness communities, farmers markets, outdoor events, year-round climate advantages, and wellness resources in the region.
-
-                Use clear, professional language. Do not add extra commentary or deviate from this structure.
+                Use clear, professional language. Do not add extra commentary.
                 """
+
                 try:
                     response = client.chat.completions.create(
                         model=MODEL_NAME,
@@ -198,10 +205,7 @@ if st.session_state.selected_agent == "fred":
                     st.caption(f"Note: {str(e)}")
                     st.stop()
 
-                st.session_state.email_status = None
-                st.session_state.email_message = ""
-
-                st.success("Fred found your perfect matches! Here's your full personalized report:")
+                st.success("Fred found your perfect matches! Here's your personalized report:")
                 st.markdown(full_report)
 
                 st.markdown("### Get Your Full Report Emailed (Save & Share)")
@@ -211,7 +215,7 @@ if st.session_state.selected_agent == "fred":
                     phone = st.text_input("Phone (optional)")
                     submitted = st.form_submit_button("📧 Send My Full Report", key="send_report_form")
                     if submitted:
-                        st.write("Sending your report...")  # Immediate feedback
+                        st.write("Sending your report...")
                         if not email:
                             st.error("Email required!")
                         else:
