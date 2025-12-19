@@ -46,7 +46,7 @@ st.markdown("<p class='tagline'>LIVE BETTER LONGER</p>", unsafe_allow_html=True)
 # Hero image
 st.image("https://i.postimg.cc/tgsgw1dW/image.jpg", use_column_width=True, caption="Your Longevity Blueprint")
 
-# Onboarding / How It Works
+# Onboarding
 st.markdown("<h2 class='motivation-header'>How It Works – 3 Simple Steps</h2>", unsafe_allow_html=True)
 st.markdown("""
 <div class='motivation-text'>
@@ -57,14 +57,14 @@ Ready to live better longer? 👇 Pick an agent below!
 </div>
 """, unsafe_allow_html=True)
 
-# Back button when an agent is selected
+# Back button when agent selected
 if st.session_state.selected_agent:
-    if st.button("← Back to Team", key="back_to_team", use_container_width=False):
+    if st.button("← Back to Team", key="back_to_team"):
         st.session_state.selected_agent = None
         st.session_state.chat_history = {}
         st.rerun()
 
-# Team selection (only show if no agent selected)
+# Team selection (only if no agent selected)
 if not st.session_state.selected_agent:
     st.markdown("### MEET THE LIFESTYLE TEAM")
     st.markdown("<p style='text-align:center; color:#0c4a6e; font-size:1.2rem;'>Click an agent to begin your longevity journey</p>", unsafe_allow_html=True)
@@ -75,29 +75,35 @@ if not st.session_state.selected_agent:
         st.markdown("<div class='agent-name'>FRED</div>", unsafe_allow_html=True)
         st.image("https://i.postimg.cc/MGxQfXtd/austin-distel-h1RW-NFt-Uyc-unsplash.jpg", width=200)
         st.markdown("<div class='agent-desc'>*YOUR WELLNESS HOME SCOUT* <br>A goal-focused realtor. Lets start by generating a detailed report of home options that match your lifestyle needs — anywhere in the U.S.!</div>", unsafe_allow_html=True)
-        if st.button("Talk to Fred →", key="fred", use_container_width=True):
+        if st.button("Talk to Fred →", key="fred"):
             st.session_state.selected_agent = "fred"
+            st.rerun()
 
     with cols[1]:
         st.markdown("<div class='agent-name'>GREG</div>", unsafe_allow_html=True)
         st.image("https://i.postimg.cc/yxf3Szvc/pexels-andres-ayrton-6551079.jpg", width=200)
         st.markdown("<div class='agent-desc'>*YOUR PERSONAL TRAINER* <br>A motivated lifestyle coach. Let start with a workout routine tailored to your fitness goals and health needs to Live Better Longer.</div>", unsafe_allow_html=True)
-        if st.button("Talk to Greg →", key="greg", use_container_width=True):
+        if st.button("Talk to Greg →", key="greg"):
             st.session_state.selected_agent = "greg"
+            st.rerun()
 
     with cols[2]:
         st.markdown("<div class='agent-name'>NURSE ZOEY ZOE</div>", unsafe_allow_html=True)
         st.image("https://images.pexels.com/photos/5215021/pexels-photo-5215021.jpeg", width=200)
         st.markdown("<div class='agent-desc'>*YOUR HEALTH ASSESSOR* <br>A compassionate wellness guide. Ask Zoey any health question. She can help you develop a proactive health lifestyle</div>", unsafe_allow_html=True)
-        if st.button("Talk to Nurse Zoey Zoe →", key="zoey", use_container_width=True):
+        if st.button("Talk to Nurse Zoey Zoe →", key="zoey"):
             st.session_state.selected_agent = "zoey"
+            st.rerun()
 
 else:
-    # Selected agent view
+    # Dedicated agent view
     agent = st.session_state.selected_agent
     agent_name = "Fred" if agent == "fred" else "Greg" if agent == "greg" else "Nurse Zoey Zoe"
 
-    # Agent-specific content
+    # Anchor to jump to main content
+    st.markdown("<div id='agent-start'></div>", unsafe_allow_html=True)
+
+    # Agent content
     if agent == "fred":
         st.markdown("### 🏡 FRED – Your Wellness Home Scout")
         st.success("**This tool is completely free – no cost, no obligation! You will receive the full personalized report below and via email.**")
@@ -314,22 +320,19 @@ Fred & the LBL Team
                         st.error("Nurse Zoey Zoe is consulting... try again.")
                         st.caption(f"Note: {str(e)}")
 
-    # Chat Box (for follow-ups)
+    # Chat Box
     st.markdown("### Have a follow-up question? Chat with me!")
     st.markdown("<div class='chat-container'>", unsafe_allow_html=True)
 
-    # Initialize chat history
     if agent not in st.session_state.chat_history:
         st.session_state.chat_history[agent] = []
 
-    # Display history
     for msg in st.session_state.chat_history[agent]:
         if msg["role"] == "user":
             st.markdown(f"<div class='user-message'>{msg['content']}</div>", unsafe_allow_html=True)
         else:
             st.markdown(f"<div class='assistant-message'>{msg['content']}</div>", unsafe_allow_html=True)
 
-    # Chat input
     if prompt := st.chat_input(f"Ask {agent_name} a question..."):
         st.session_state.chat_history[agent].append({"role": "user", "content": prompt})
         st.markdown(f"<div class='user-message'>{prompt}</div>", unsafe_allow_html=True)
