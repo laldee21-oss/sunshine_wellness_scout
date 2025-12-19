@@ -1,5 +1,3 @@
-# pages/nurse_zoey_zoe.py (Nurse Zoey Zoe's Dedicated Page)
-
 import streamlit as st
 from openai import OpenAI
 
@@ -20,8 +18,20 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# Back to home
-st.button("← Back to Team", on_click=lambda: st.switch_page("streamlit_app.py"))
+# Back to Team
+if st.button("← Back to Team"):
+    st.session_state.selected_agent = None
+    st.session_state.chat_history = {}
+    st.rerun()
+
+# Auto-scroll to hero image
+st.markdown("<div id='agent-interaction'></div>", unsafe_allow_html=True)
+st.markdown("""
+<script>
+    const element = document.getElementById('agent-interaction');
+    if (element) element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+</script>
+""", unsafe_allow_html=True)
 
 # Hero image
 st.image("https://i.postimg.cc/BnFgfCTD/pexels-kampus-7551620.jpg", use_column_width=True, caption="LIVE BETTER LONGER – Welcome to your longevity lifestyle")
