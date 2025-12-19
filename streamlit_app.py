@@ -233,7 +233,7 @@ if st.session_state.selected_agent == "fred":
                             st.error("Email required!")
                         else:
                             data = {
-                                "from": "onboarding@resend.dev",
+                                "from": "reports@lbllifestyle.com",
                                 "to": [email],
                                 "cc": [YOUR_EMAIL],
                                 "subject": f"{name}'s LBL Lifestyle Home Report",
@@ -358,4 +358,5 @@ elif st.session_state.selected_agent == "zoey":
 # Footer
 st.markdown("---")
 st.markdown("<small>LBL Lifestyle Solutions • Your Holistic Longevity Blueprint<br>Powered by Grok (xAI) • Personalized wellness powered by AI</small>", unsafe_allow_html=True)
+
 
