@@ -12,7 +12,7 @@ client = OpenAI(api_key=XAI_API_KEY, base_url="https://api.x.ai/v1")
 MODEL_NAME = "grok-4-1-fast-reasoning"
 
 def fetch_pexels_image(neighborhood="", location_hint="", theme_hints=""):
-    """Smart fallback: neighborhood → city/state → theme (beach, mountains, etc.)"""
+    """Smart fallback: neighborhood → city/state → theme"""
     if not PEXELS_API_KEY:
         return None
 
@@ -48,7 +48,7 @@ def fetch_pexels_image(neighborhood="", location_hint="", theme_hints=""):
     return None
 
 def add_images_to_report(report_text, location_hint="", client_needs=""):
-    """Add one relevant photo under each Top 5 neighborhood — smart fallbacks, no duplicates"""
+    """Add one relevant photo under each Top 5 neighborhood"""
     lines = report_text.split('\n')
     enhanced_lines = []
     in_top_5 = False
@@ -102,7 +102,7 @@ def show():
     </script>
     """, unsafe_allow_html=True)
 
-    # Back button — with unique key to prevent duplicate ID error
+    # Back button — unique key
     if st.button("← Back to Team", key="fred_back_button"):
         st.session_state.current_page = "home"
         st.rerun()
@@ -160,8 +160,8 @@ def show():
             st.warning("Please share your story above so Fred can create the best report for you!")
         else:
             with st.spinner("Fred is crafting your personalized report..."):
-                # Permanent defaults
-                permanent_prompt = """
+                # Core sections (always included)
+                core_prompt = """
 ### Introduction
 5-6 sentences introducing how well their needs match the area and budget.
 
@@ -174,28 +174,59 @@ def show():
 # (repeat for 2-5)
 """
 
-                # Optional sections
-                selected_prompt = ""
+                # Optional sections (only if selected)
+                optional_prompt = ""
                 if "Wellness/Outdoor Highlights" in report_sections:
-                    selected_prompt += "### Wellness/Outdoor Highlights\n6-10 sentences covering key trails, parks, etc.\n\n"
+                    optional_prompt += "### Wellness/Outdoor Highlights\n6-10 sentences covering key trails, parks, etc.\n\n"
                 if "Cost of Living & Financial Breakdown" in report_sections:
-                    selected_prompt += "### Cost of Living & Financial Breakdown\nDetailed comparison of monthly expenses, property taxes, and affordability for longevity planning (6-8 sentences).\n\n"
+                    optional_prompt += "### Cost of Living & Financial Breakdown\nDetailed comparison of monthly expenses, property taxes, and affordability for longevity planning (6-8 sentences).\n\n"
                 if "Healthcare Access & Longevity Metrics" in report_sections:
-                    selected_prompt += "### Healthcare Access & Longevity Metrics\nTop hospitals, specialists, life expectancy, air quality, and wellness infrastructure (5-7 sentences).\n\n"
+                    optional_prompt += "### Healthcare Access & Longevity Metrics\nTop hospitals, specialists, life expectancy, air quality, and wellness infrastructure (5-7 sentences).\n\n"
                 if "Community & Social Wellness" in report_sections:
-                    selected_prompt += "### Community & Social Wellness\nLocal groups, events, and opportunities for connection and belonging (5-7 sentences).\n\n"
+                    optional_prompt += "### Community & Social Wellness\nLocal groups, events, and opportunities for connection and belonging (5-7 sentences).\n\n"
                 if "Climate & Seasonal Wellness Tips" in report_sections:
-                    selected_prompt += "### Climate & Seasonal Wellness Tips\nYear-round activity potential, weather patterns, and tips for thriving in all seasons (5-7 sentences).\n\n"
+                    optional_prompt += "### Climate & Seasonal Wellness Tips\nYear-round activity potential, weather patterns, and tips for thriving in all seasons (5-7 sentences).\n\n"
                 if "Transportation & Daily Convenience" in report_sections:
-                    selected_prompt += "### Transportation & Daily Convenience\nWalkability, transit, and ease of daily errands for an active lifestyle (4-6 sentences).\n\n"
+                    optional_prompt += "### Transportation & Daily Convenience\nWalkability, transit, and ease of daily errands for an active lifestyle (4-6 sentences).\n\n"
                 if "Future-Proofing for Aging in Place" in report_sections:
-                    selected_prompt += "### Future-Proofing for Aging in Place\nAvailability of accessible homes and long-term livability features (4-6 sentences).\n\n"
+                    optional_prompt += "### Future-Proofing for Aging in Place\nAvailability of accessible homes and long-term livability features (4-6 sentences).\n\n"
                 if "Sample Daily Wellness Routine in This Area" in report_sections:
-                    selected_prompt += "### Sample Daily Wellness Routine in This Area\nAn inspiring example day tailored to the recommended locations (6-8 sentences).\n\n"
+                    optional_prompt += "### Sample Daily Wellness Routine in This Area\nAn inspiring example day tailored to the recommended locations (6-8 sentences).\n\n"
                 if "Top Property Recommendations" in report_sections:
-                    selected_prompt += "### Top Property Recommendations\n1-3 specific property ideas with estimated prices, key wellness features, and why they fit (4-6 sentences each).\n\n"
+                    optional_prompt += "### Top Property Recommendations\n1-3 specific property ideas with estimated prices, key wellness features, and why they fit (4-6 sentences each).\n\n"
 
-                full_prompt = permanent_prompt + selected_prompt
+                # Full report prompt (core + optional) — used for display
+                display_prompt = core_prompt + optional_prompt
+
+                # Complete full report prompt (all possible sections) — used for email
+                full_report_prompt = core_prompt + """
+### Wellness/Outdoor Highlights
+6-10 sentences covering key trails, parks, etc.
+
+### Cost of Living & Financial Breakdown
+Detailed comparison of monthly expenses, property taxes, and affordability for longevity planning (6-8 sentences).
+
+### Healthcare Access & Longevity Metrics
+Top hospitals, specialists, life expectancy, air quality, and wellness infrastructure (5-7 sentences).
+
+### Community & Social Wellness
+Local groups, events, and opportunities for connection and belonging (5-7 sentences).
+
+### Climate & Seasonal Wellness Tips
+Year-round activity potential, weather patterns, and tips for thriving in all seasons (5-7 sentences).
+
+### Transportation & Daily Convenience
+Walkability, transit, and ease of daily errands for an active lifestyle (4-6 sentences).
+
+### Future-Proofing for Aging in Place
+Availability of accessible homes and long-term livability features (4-6 sentences).
+
+### Sample Daily Wellness Routine in This Area
+An inspiring example day tailored to the recommended locations (6-8 sentences).
+
+### Top Property Recommendations
+1-3 specific property ideas with estimated prices, key wellness features, and why they fit (4-6 sentences each).
+"""
 
                 base_prompt = f"""
                 Client description:
@@ -209,66 +240,91 @@ def show():
                 """
 
                 try:
-                    response = client.chat.completions.create(
+                    # Generate display report (core + selected optional)
+                    display_response = client.chat.completions.create(
                         model=MODEL_NAME,
                         messages=[
                             {"role": "system", "content": "You are Fred, a professional goal-focused real estate advisor."},
-                            {"role": "user", "content": base_prompt + "\n" + full_prompt}
+                            {"role": "user", "content": base_prompt + "\n" + display_prompt}
                         ],
                         max_tokens=3000,
                         temperature=0.7
                     )
-                    report = response.choices[0].message.content
+                    display_report = display_response.choices[0].message.content
 
-                    report_with_images = add_images_to_report(report, location_hint, client_needs)
+                    # Generate full report (all sections) for email
+                    full_response = client.chat.completions.create(
+                        model=MODEL_NAME,
+                        messages=[
+                            {"role": "system", "content": "You are Fred, a professional goal-focused real estate advisor."},
+                            {"role": "user", "content": base_prompt + "\n" + full_report_prompt}
+                        ],
+                        max_tokens=4000,
+                        temperature=0.7
+                    )
+                    full_report = full_response.choices[0].message.content
 
+                    # Add photos to both
+                    display_report_with_images = add_images_to_report(display_report, location_hint, client_needs)
+                    full_report_with_images = add_images_to_report(full_report, location_hint, client_needs)
+
+                    # Show only the selected report on screen
                     st.success("Fred found your perfect matches! Here's your personalized report:")
-                    st.markdown(report_with_images)
+                    st.markdown(display_report_with_images)
 
-                    st.session_state.chat_history["fred"].append({"role": "assistant", "content": f"Here's your full wellness home report:\n\n{report_with_images}"})
+                    # Save full report for email
+                    st.session_state.full_report_for_email = full_report_with_images
 
-                    st.markdown("### Get Your Full Report Emailed (Save & Share)")
-                    with st.form("lead_form", clear_on_submit=True):
-                        name = st.text_input("Your Name")
-                        email = st.text_input("Email (required)", placeholder="you@example.com")
-                        phone = st.text_input("Phone (optional)")
-                        submitted = st.form_submit_button("📧 Send My Full Report")
-                        if submitted:
-                            if not email:
-                                st.error("Email required!")
-                            else:
-                                email_body = f"""Hi {name or 'there'},
+                    # Add display report to chat history
+                    st.session_state.chat_history["fred"].append({"role": "assistant", "content": f"Here's your personalized report:\n\n{display_report_with_images}"})
+                except Exception as e:
+                    st.error("Fred is reviewing listings... try again soon.")
+                    st.caption(f"Error: {str(e)}")
+
+    # Email form — only shown after report generated
+    if "full_report_for_email" in st.session_state:
+        st.markdown("### Get Your Full Report Emailed (Save & Share)")
+        with st.form("lead_form", clear_on_submit=True):
+            name = st.text_input("Your Name")
+            email = st.text_input("Email (required)", placeholder="you@example.com")
+            phone = st.text_input("Phone (optional)")
+            submitted = st.form_submit_button("📧 Send My Full Report")
+            if submitted:
+                if not email:
+                    st.error("Email required!")
+                else:
+                    report_to_send = st.session_state.full_report_for_email
+                    email_body = f"""Hi {name or 'there'},
 
 Thank you for exploring LBL Lifestyle Solutions – Your Holistic Longevity Blueprint.
 
-Here's your full personalized wellness home report:
+Here's your COMPLETE personalized wellness home report:
 
-{report_with_images}
+{report_to_send}
 
 Reply anytime to discuss how we can build your complete longevity plan.
 
 Best regards,
 Fred & the LBL Team"""
-                                data = {
-                                    "from": "reports@lbllifestyle.com",
-                                    "to": [email],
-                                    "cc": [YOUR_EMAIL],
-                                    "subject": f"{name or 'Client'}'s LBL Wellness Home Report",
-                                    "text": email_body
-                                }
-                                headers = {"Authorization": f"Bearer {RESEND_API_KEY}", "Content-Type": "application/json"}
-                                try:
-                                    response = requests.post("https://api.resend.com/emails", json=data, headers=headers)
-                                    if response.status_code == 200:
-                                        st.success(f"Full report sent to {email}! Check your inbox.")
-                                        st.balloons()
-                                    else:
-                                        st.error(f"Send failed: {response.text}")
-                                except Exception as e:
-                                    st.error(f"Send error: {str(e)}")
-                except Exception as e:
-                    st.error("Fred is reviewing listings... try again soon.")
-                    st.caption(f"Error: {str(e)}")
+                    data = {
+                        "from": "reports@lbllifestyle.com",
+                        "to": [email],
+                        "cc": [YOUR_EMAIL],
+                        "subject": f"{name or 'Client'}'s Complete LBL Wellness Home Report",
+                        "text": email_body
+                    }
+                    headers = {"Authorization": f"Bearer {RESEND_API_KEY}", "Content-Type": "application/json"}
+                    try:
+                        response = requests.post("https://api.resend.com/emails", json=data, headers=headers)
+                        if response.status_code == 200:
+                            st.success(f"Complete report sent to {email}! Check your inbox.")
+                            st.balloons()
+                            if "full_report_for_email" in st.session_state:
+                                del st.session_state.full_report_for_email
+                        else:
+                            st.error(f"Send failed: {response.text}")
+                    except Exception as e:
+                        st.error(f"Send error: {str(e)}")
 
     # Streamlined chat
     st.markdown("### Have a follow-up question? Start a chat with me in the Ask Fred banner below!")
