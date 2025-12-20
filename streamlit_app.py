@@ -85,7 +85,7 @@ if st.session_state.current_page == "home":
 
     with cols[3]:
         st.markdown("<div class='agent-name'>NORA</div>", unsafe_allow_html=True)
-        st.image("https://i.postimg.cc/8cQ7n3jK/healthy-food-bowl.jpg", width=200)  # Replace with your Nora image
+        st.image("https://i.postimg.cc/cJqPm9BP/pexels-tessy-agbonome-521343232-18252407.jpg", width=200)  # Replace with your Nora image
         st.markdown("<div class='agent-desc'>*YOUR NUTRITION COACH* <br>Personalized longevity meal plans, Blue Zones recipes, grocery lists — delicious food for a longer life.</div>", unsafe_allow_html=True)
         if st.button("Talk to Nora →", key="nora_home"):
             navigate_to("nora")
@@ -112,3 +112,4 @@ elif st.session_state.current_page == "zoey":
 elif st.session_state.current_page == "nora":
     import pages.nora as nora_page
     nora_page.show()
+
