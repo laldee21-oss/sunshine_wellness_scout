@@ -26,6 +26,15 @@ st.markdown("""
 # Back to home
 st.button("← Back to Team", on_click=lambda: st.switch_page("streamlit_app.py"))
 
+# Auto-scroll to hero image
+st.markdown("<div id='agent-interaction'></div>", unsafe_allow_html=True)
+st.markdown("""
+<script>
+    const element = document.getElementById('agent-interaction');
+    if (element) element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+</script>
+""", unsafe_allow_html=True)
+
 # Hero image
 st.image("https://i.postimg.cc/fRms9xv6/tierra-mallorca-rg-J1J8SDEAY-unsplash.jpg", caption="Your Keys Await – Welcome to your longevity lifestyle")
 
