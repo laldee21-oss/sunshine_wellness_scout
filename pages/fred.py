@@ -135,7 +135,7 @@ Hi {name},
 
 Thank you for exploring LBL Lifestyle Solutions – Your Holistic Longevity Blueprint.
 
-Here's your full personalized Florida wellness home report:
+Here's your full personalized wellness home report:
 
 {full_report}
 
@@ -192,7 +192,7 @@ if prompt := st.chat_input("Ask Fred a question..."):
             response = client.chat.completions.create(
                 model=MODEL_NAME,
                 messages=[
-                    {"role": "system", "content": get_chat_system_prompt("fred")},
+                    {"role": "system", "content": "You are Fred, a professional goal-focused real estate advisor specializing in wellness and active lifestyle properties across the United States."},
                     *st.session_state.chat_history["fred"]
                 ],
                 max_tokens=800,
@@ -208,5 +208,6 @@ if prompt := st.chat_input("Ask Fred a question..."):
 
 st.markdown("</div>", unsafe_allow_html=True)
 
+# Footer
 st.markdown("---")
 st.markdown("<small>LBL Lifestyle Solutions • Your Holistic Longevity Blueprint<br>Powered by Grok (xAI) • Personalized wellness powered by AI</small>", unsafe_allow_html=True)
