@@ -11,35 +11,60 @@ PEXELS_API_KEY = st.secrets.get("PEXELS_API_KEY", "")
 client = OpenAI(api_key=XAI_API_KEY, base_url="https://api.x.ai/v1")
 MODEL_NAME = "grok-4-1-fast-reasoning"
 
-def fetch_pexels_image(neighborhood, location_hint=""):
-    """Fetch one high-quality image for a neighborhood"""
+def fetch_pexels_image(neighborhood="", location_hint="", theme_hints=""):
+    """Smart fallback: neighborhood → city/state → theme (beach, mountains, etc.)"""
     if not PEXELS_API_KEY:
         return None
 
     headers = {"Authorization": PEXELS_API_KEY}
     url = "https://api.pexels.com/v1/search"
 
-    query = f"{neighborhood} {location_hint} neighborhood homes landscape nature aerial view"
-    params = {
-        "query": query,
-        "per_page": 1,
-        "orientation": "landscape"
-    }
-    try:
-        response = requests.get(url, headers=headers, params=params, timeout=10)
-        if response.status_code == 200:
-            data = response.json()
-            if data.get("photos"):
-                return data["photos"][0]["src"]["large2x"]
-    except:
-        pass
+    queries = []
+    if neighborhood and location_hint:
+        queries.append(f"{neighborhood} {location_hint} neighborhood homes landscape nature aerial view")
+    if neighborhood:
+        queries.append(f"{neighborhood} residential homes nature sunset")
+    if location_hint:
+        queries.append(f"{location_hint} city skyline landscape homes nature")
+        queries.append(f"{location_hint} scenic view aerial sunset")
+    if theme_hints:
+        queries.append(f"{location_hint or 'USA'} {theme_hints} landscape nature homes")
+    queries.append("wellness home nature landscape sunset")  # Gentle final fallback
+
+    seen_urls = set()
+    for query in queries:
+        params = {"query": query, "per_page": 3, "orientation": "landscape"}
+        try:
+            response = requests.get(url, headers=headers, params=params, timeout=10)
+            if response.status_code == 200:
+                data = response.json()
+                for photo in data.get("photos", []):
+                    img_url = photo["src"]["large2x"]
+                    if img_url not in seen_urls:
+                        seen_urls.add(img_url)
+                        return img_url
+        except:
+            continue
     return None
 
-def add_images_to_report(report_text, location_hint=""):
-    """Add one photo under each Top 5 neighborhood"""
+def add_images_to_report(report_text, location_hint="", client_needs=""):
+    """Add one relevant photo under each Top 5 neighborhood — smart fallbacks, no duplicates"""
     lines = report_text.split('\n')
     enhanced_lines = []
     in_top_5 = False
+    seen_urls = set()
+
+    # Detect themes from user input for better fallbacks
+    lower_needs = client_needs.lower()
+    theme_hints = ""
+    if any(word in lower_needs for word in ["beach", "ocean", "tampa", "florida", "coast"]):
+        theme_hints = "beach ocean sunset palm trees waterfront"
+    elif any(word in lower_needs for word in ["mountain", "asheville", "hike", "trail", "cabins"]):
+        theme_hints = "mountains cabins forest autumn nature scenic"
+    elif any(word in lower_needs for word in ["lake", "waterfront"]):
+        theme_hints = "lake waterfront homes nature"
+    elif "golf" in lower_needs:
+        theme_hints = "golf course green landscape"
 
     for line in lines:
         enhanced_lines.append(line)
@@ -51,11 +76,12 @@ def add_images_to_report(report_text, location_hint=""):
             parts = line.split('-', 1)
             if len(parts) > 1:
                 name_part = parts[0].strip()[2:].strip()
-                img_url = fetch_pexels_image(name_part, location_hint)
-                if img_url:
+                img_url = fetch_pexels_image(name_part, location_hint, theme_hints)
+                if img_url and img_url not in seen_urls:
                     enhanced_lines.append("")
-                    enhanced_lines.append(f"![{name_part} – Scenic homes and neighborhood view]({img_url})")
+                    enhanced_lines.append(f"![{name_part} – Beautiful homes and scenery]({img_url})")
                     enhanced_lines.append("")
+                    seen_urls.add(img_url)
 
     return '\n'.join(enhanced_lines)
 
@@ -91,7 +117,7 @@ def show():
     st.success("**This tool is completely free – no cost, no obligation! You will receive the full personalized report below and via email.**")
     st.write("The perfect home that supports your lifestyle awaits — anywhere in the U.S.!")
 
-    # NEW: Encouraging input section
+    # Encouraging input
     st.markdown("### Tell Fred a little bit about you and your dream wellness home")
     st.write("**Be as detailed as possible!** The more you share about your age, family, hobbies, must-haves, daily routine, and wellness goals, the more accurate and personalized Fred's recommendations will be. 😊")
     st.caption("💡 Tip: Include age, family size, favorite activities, deal-breakers, and why longevity matters to you!")
@@ -197,13 +223,17 @@ def show():
                     )
                     report = response.choices[0].message.content
 
-                    report_with_images = add_images_to_report(report, location_hint)
+                    # Add photos with smart fallbacks
+                    report_with_images = add_images_to_report(report, location_hint, client_needs)
 
+                    # Display once
                     st.success("Fred found your perfect matches! Here's your personalized report:")
                     st.markdown(report_with_images)
 
+                    # Save to history
                     st.session_state.chat_history["fred"].append({"role": "assistant", "content": f"Here's your full wellness home report:\n\n{report_with_images}"})
 
+                    # Email form
                     st.markdown("### Get Your Full Report Emailed (Save & Share)")
                     with st.form("lead_form", clear_on_submit=True):
                         name = st.text_input("Your Name")
@@ -226,7 +256,7 @@ def show():
                                 try:
                                     response = requests.post("https://api.resend.com/emails", json=data, headers=headers)
                                     if response.status_code == 200:
-                                        st.success(f"Full report sent to {email}!")
+                                        st.success(f"Full report sent to {email}! Check your inbox.")
                                         st.balloons()
                                     else:
                                         st.error(f"Send failed: {response.text}")
