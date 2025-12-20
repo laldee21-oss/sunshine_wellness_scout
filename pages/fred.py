@@ -12,7 +12,7 @@ client = OpenAI(api_key=XAI_API_KEY, base_url="https://api.x.ai/v1")
 MODEL_NAME = "grok-4-1-fast-reasoning"
 
 def fetch_pexels_image(neighborhood="", location_hint="", theme_hints=""):
-    """Smart fallback: neighborhood → city/state → theme (beach, mountains, etc.)"""
+    """Smart, accurate photo fetch with strong location/theme priority"""
     if not PEXELS_API_KEY:
         return None
 
@@ -20,16 +20,22 @@ def fetch_pexels_image(neighborhood="", location_hint="", theme_hints=""):
     url = "https://api.pexels.com/v1/search"
 
     queries = []
+
+    # Priority 1: Neighborhood + location (most accurate)
     if neighborhood and location_hint:
-        queries.append(f"{neighborhood} {location_hint} neighborhood homes landscape nature aerial view")
-    if neighborhood:
-        queries.append(f"{neighborhood} residential homes nature sunset")
+        queries.append(f"{neighborhood} {location_hint} homes neighborhood landscape aerial")
+
+    # Priority 2: Location only (city/state theme)
     if location_hint:
-        queries.append(f"{location_hint} city skyline landscape homes nature")
-        queries.append(f"{location_hint} scenic view aerial sunset")
+        queries.append(f"{location_hint} residential homes landscape nature")
+        queries.append(f"{location_hint} scenic view mountains cabins" if "colorado" in location_hint.lower() or "mountain" in theme_hints else f"{location_hint} beach ocean sunset" if "florida" in location_hint.lower() or "beach" in theme_hints else f"{location_hint} city park homes nature")
+
+    # Priority 3: Theme fallback
     if theme_hints:
-        queries.append(f"{location_hint or 'USA'} {theme_hints} landscape nature homes")
-    queries.append("wellness home nature landscape sunset")  # Gentle final fallback
+        queries.append(theme_hints + " landscape nature homes")
+
+    # Final generic
+    queries.append("wellness home nature landscape")
 
     seen_urls = set()
     for query in queries:
@@ -48,23 +54,21 @@ def fetch_pexels_image(neighborhood="", location_hint="", theme_hints=""):
     return None
 
 def add_images_to_report(report_text, location_hint="", client_needs=""):
-    """Add one relevant photo under each Top 5 neighborhood — smart fallbacks, no duplicates"""
+    """Add ONE relevant photo under each Top 5 neighborhood ONLY"""
     lines = report_text.split('\n')
     enhanced_lines = []
     in_top_5 = False
     seen_urls = set()
 
-    # Detect themes from user input for better fallbacks
-    lower_needs = client_needs.lower()
+    # Theme detection from user input
     theme_hints = ""
+    lower_needs = client_needs.lower()
     if any(word in lower_needs for word in ["beach", "ocean", "tampa", "florida", "coast"]):
         theme_hints = "beach ocean sunset palm trees waterfront"
-    elif any(word in lower_needs for word in ["mountain", "asheville", "hike", "trail", "cabins"]):
-        theme_hints = "mountains cabins forest autumn nature scenic"
+    elif any(word in lower_needs for word in ["mountain", "asheville", "colorado", "hike", "trail", "cabins"]):
+        theme_hints = "mountains cabins forest autumn nature scenic rocky"
     elif any(word in lower_needs for word in ["lake", "waterfront"]):
         theme_hints = "lake waterfront homes nature"
-    elif "golf" in lower_needs:
-        theme_hints = "golf course green landscape"
 
     for line in lines:
         enhanced_lines.append(line)
@@ -223,17 +227,17 @@ def show():
                     )
                     report = response.choices[0].message.content
 
-                    # Add photos with smart fallbacks
+                    # Add photos ONLY to Top 5
                     report_with_images = add_images_to_report(report, location_hint, client_needs)
 
-                    # Display once
+                    # Display report ONCE
                     st.success("Fred found your perfect matches! Here's your personalized report:")
                     st.markdown(report_with_images)
 
-                    # Save to history
+                    # Save full to history
                     st.session_state.chat_history["fred"].append({"role": "assistant", "content": f"Here's your full wellness home report:\n\n{report_with_images}"})
 
-                    # Email form
+                    # Email form — clean, no duplicate report
                     st.markdown("### Get Your Full Report Emailed (Save & Share)")
                     with st.form("lead_form", clear_on_submit=True):
                         name = st.text_input("Your Name")
