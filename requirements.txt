@@ -1,4 +1,3 @@
 streamlit>=1.32.0
 openai
 requests
-Pillow==9.5.0  # This version builds reliably on Streamlit Cloud
