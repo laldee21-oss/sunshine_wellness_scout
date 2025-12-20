@@ -11,21 +11,45 @@ def show():
     if "chat_history" not in st.session_state:
         st.session_state.chat_history = {"nora": []}
 
-    # CSS
+    # NEW PROFESSIONAL DESIGN
     st.markdown("""
     <style>
-        .stApp { background: linear-gradient(to bottom, #ffecd2, #fcb69f); color: #0c4a6e; }
-        .stButton>button { background-color: #ea580c; color: white; border-radius: 15px; font-weight: bold; font-size: 1.2rem; height: 4em; width: 100%; }
-        .optional-box {
-            background-color: #f0f0f0;
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            border-left: 4px solid #ea580c;
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Inter:wght@400;500;600&display=swap');
+        
+        .stApp {
+            background: linear-gradient(to bottom, #f8f9fa, #e6f0fa);
+            color: #1e3a2f;
+            font-family: 'Inter', sans-serif;
         }
-        .separator {
-            margin: 30px 0;
-            border-top: 1px solid #ddd;
+        h1, h2, h3 {
+            font-family: 'Playfair Display', serif;
+            color: #2d6a4f;
+            font-weight: 600;
+        }
+        .stButton>button {
+            background-color: #2d6a4f;
+            color: white;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            height: 3.5em;
+            border: none;
+            box-shadow: 0 4px 8px rgba(45, 106, 79, 0.2);
+        }
+        .stButton>button:hover {
+            background-color: #40916c;
+        }
+        .stSuccess, .stInfo {
+            background-color: #d8f0e6;
+            border-left: 5px solid #40916c;
+        }
+        .stWarning {
+            background-color: #fff3cd;
+            border-left: 5px solid #ffc107;
+        }
+        img {
+            border-radius: 16px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
         }
     </style>
     """, unsafe_allow_html=True)
@@ -61,14 +85,7 @@ def show():
     st.caption("💡 Tip: Include favorite foods, foods to avoid, cooking time available, and health priorities!")
 
     age = st.slider("Your age", 18, 80, 45)
-
-    # Goals + Optional Notes
     goals = st.multiselect("PRIMARY NUTRITION GOALS", ["Longevity/anti-aging", "Energy & vitality", "Heart health", "Weight management", "Gut health", "Brain health", "Muscle maintenance", "General wellness"])
-    
-    goals_notes = st.text_area("Optional: Notes on your goals (e.g., specific preferences)", height=100)
-    
-
-    st.markdown('<div class="separator"></div>', unsafe_allow_html=True)
 
     # Dietary preferences with tooltips
     dietary_options = [
@@ -93,38 +110,21 @@ def show():
         for diet in selected_dietary:
             st.caption(f"**{diet}**: {dietary_tooltips[diet]}")
 
-        dietary_notes = st.text_area("Optional: Notes on your dietary preferences (e.g., foods to include/avoid)", height=100)
-    
-    st.markdown('<div class="separator"></div>', unsafe_allow_html=True)
-
     allergies = st.text_area("ALLERGIES OR INTOLERANCES? (optional)", placeholder="Example: Gluten intolerant, lactose sensitive, nut allergy")
 
-    st.markdown('<div class="separator"></div>', unsafe_allow_html=True)
-    
     budget_level = st.selectbox("WEEKLY GROCERY BUDGET LEVEL", ["Budget-conscious", "Moderate", "Premium/organic focus"])
-    
-    budget_notes = st.text_input("Optional: Specific budget amount or notes (e.g., $100/week max)")
-    st.markdown('</div>', unsafe_allow_html=True)
-
-    st.markdown('<div class="separator"></div>', unsafe_allow_html=True)
 
     cooking_time = st.selectbox("TIME AVAILABLE FOR COOKING", ["<20 min/meal", "20–40 min/meal", "40+ min/meal (love cooking)"])
-    
-    cooking_notes = st.text_input("Optional: Specific cooking notes (e.g., prefer batch cooking on weekends)")
-    st.markdown('</div>', unsafe_allow_html=True)
-
-    st.markdown('<div class="separator"></div>', unsafe_allow_html=True)
-
     meals_per_day = st.slider("MEALS PER DAY YOU WANT PLANS FOR", 2, 5, 3)
 
-    # Macro input
-    
+    # Optional inputs in light grey
+    st.markdown("### Optional Additional Details")
+    st.markdown('<div style="background-color:#f5f5f5;padding:15px;border-radius:10px;margin-bottom:20px;">', unsafe_allow_html=True)
+    goals_notes = st.text_area("Optional: Notes on your goals (e.g., specific preferences)", height=100)
+    dietary_notes = st.text_area("Optional: Notes on your dietary preferences (e.g., foods to include/avoid)", height=100)
+    budget_notes = st.text_input("Optional: Specific budget amount or notes (e.g., $100/week max)")
+    cooking_notes = st.text_input("Optional: Specific cooking notes (e.g., prefer batch cooking on weekends)")
     macro_input = st.text_input("Optional: Daily Macro Targets (e.g., 40% carbs, 30% protein, 30% fat)", placeholder="Leave blank for balanced default")
-    
-
-    # Greg upload
-    
-    
     st.write("**Optional: Team Up with Greg!**")
     st.write("If you've generated a workout plan with Greg, upload it here — Nora will coordinate nutrition to support your training.")
     greg_plan_file = st.file_uploader("Upload Greg's plan (TXT, PDF, PNG, JPG)", type=["txt", "pdf", "png", "jpg", "jpeg"], key="greg_upload_nora")
