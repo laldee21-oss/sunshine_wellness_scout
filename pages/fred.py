@@ -64,9 +64,22 @@ def show():
             "Introduction summary",
             "Top 5 Neighborhoods/Suburbs and Why They Fit (with fun facts)",
             "Top 5 Must-Have Home Features",
-            "Wellness/Outdoor Highlights"
+            "Wellness/Outdoor Highlights",
+            "Cost of Living & Financial Breakdown",
+            "Healthcare Access & Longevity Metrics",
+            "Community & Social Wellness",
+            "Climate & Seasonal Wellness Tips",
+            "Transportation & Daily Convenience",
+            "Future-Proofing for Aging in Place",
+            "Sample Daily Wellness Routine in This Area"
         ],
-        default=["Top 5 Neighborhoods/Suburbs and Why They Fit (with fun facts)", "Top 5 Must-Have Home Features", "Wellness/Outdoor Highlights"]
+        default=[
+            "Top 5 Neighborhoods/Suburbs and Why They Fit (with fun facts)",
+            "Top 5 Must-Have Home Features",
+            "Wellness/Outdoor Highlights",
+            "Cost of Living & Financial Breakdown",
+            "Healthcare Access & Longevity Metrics"
+        ]
     )
 
     if st.button("🔍 GENERATE MY REPORT", type="primary"):
@@ -74,17 +87,70 @@ def show():
             st.warning("Please describe your lifestyle needs above!")
         else:
             with st.spinner("Fred is crafting your personalized report..."):
-                sections_prompt = ""
+                # Build prompt for SELECTED sections (shown on screen)
+                selected_prompt = ""
                 if "Introduction summary" in report_sections:
-                    sections_prompt += "### Introduction\n5-6 sentences introducing how well their needs match the area and budget.\n\n"
+                    selected_prompt += "### Introduction\n5-6 sentences introducing how well their needs match the area and budget.\n\n"
                 if "Top 5 Neighborhoods/Suburbs and Why They Fit (with fun facts)" in report_sections:
-                    sections_prompt += "### Top 5 Neighborhoods/Suburbs and Why They Fit\n1. [Neighborhood Name Here] - [Detailed explanation... 5-8 sentences.] [Fun facts: weather trends, cost of living, safety, commute/transportation, healthcare, culture/lifestyle, and overall vibe. 3-5 sentences.]\n# (repeat for 2-5)\n\n"
+                    selected_prompt += "### Top 5 Neighborhoods/Suburbs and Why They Fit\n1. [Neighborhood Name Here] - [Detailed explanation... 5-8 sentences.] [Fun facts: weather trends, cost of living, safety, commute/transportation, healthcare, culture/lifestyle, and overall vibe. 3-5 sentences.]\n# (repeat for 2-5)\n\n"
                 if "Top 5 Must-Have Home Features" in report_sections:
-                    sections_prompt += "### Top 5 Must-Have Home Features\n1. [Feature Name Here] - [In-depth reason... 5-8 sentences.]\n# (repeat for 2-5)\n\n"
+                    selected_prompt += "### Top 5 Must-Have Home Features\n1. [Feature Name Here] - [In-depth reason... 5-8 sentences.]\n# (repeat for 2-5)\n\n"
                 if "Wellness/Outdoor Highlights" in report_sections:
-                    sections_prompt += "### Wellness/Outdoor Highlights\n6-10 sentences covering key trails, parks, etc.\n\n"
+                    selected_prompt += "### Wellness/Outdoor Highlights\n6-10 sentences covering key trails, parks, etc.\n\n"
+                if "Cost of Living & Financial Breakdown" in report_sections:
+                    selected_prompt += "### Cost of Living & Financial Breakdown\nDetailed comparison of monthly expenses, property taxes, and affordability for longevity planning (6-8 sentences).\n\n"
+                if "Healthcare Access & Longevity Metrics" in report_sections:
+                    selected_prompt += "### Healthcare Access & Longevity Metrics\nTop hospitals, specialists, life expectancy, air quality, and wellness infrastructure (5-7 sentences).\n\n"
+                if "Community & Social Wellness" in report_sections:
+                    selected_prompt += "### Community & Social Wellness\nLocal groups, events, and opportunities for connection and belonging (5-7 sentences).\n\n"
+                if "Climate & Seasonal Wellness Tips" in report_sections:
+                    selected_prompt += "### Climate & Seasonal Wellness Tips\nYear-round activity potential, weather patterns, and tips for thriving in all seasons (5-7 sentences).\n\n"
+                if "Transportation & Daily Convenience" in report_sections:
+                    selected_prompt += "### Transportation & Daily Convenience\nWalkability, transit, and ease of daily errands for an active lifestyle (4-6 sentences).\n\n"
+                if "Future-Proofing for Aging in Place" in report_sections:
+                    selected_prompt += "### Future-Proofing for Aging in Place\nAvailability of accessible homes and long-term livability features (4-6 sentences).\n\n"
+                if "Sample Daily Wellness Routine in This Area" in report_sections:
+                    selected_prompt += "### Sample Daily Wellness Routine in This Area\nAn inspiring example day tailored to the recommended locations (6-8 sentences).\n\n"
 
-                full_prompt = f"""
+                # Build FULL prompt for email (all sections always)
+                full_sections_prompt = """
+### Introduction
+5-6 sentences introducing how well their needs match the area and budget.
+
+### Top 5 Neighborhoods/Suburbs and Why They Fit
+1. [Neighborhood Name Here] - [Detailed explanation... 5-8 sentences.] [Fun facts: weather trends, cost of living, safety, commute/transportation, healthcare, culture/lifestyle, and overall vibe. 3-5 sentences.]
+# (repeat for 2-5)
+
+### Top 5 Must-Have Home Features
+1. [Feature Name Here] - [In-depth reason... 5-8 sentences.]
+# (repeat for 2-5)
+
+### Wellness/Outdoor Highlights
+6-10 sentences covering key trails, parks, etc.
+
+### Cost of Living & Financial Breakdown
+Detailed comparison of monthly expenses, property taxes, and affordability for longevity planning (6-8 sentences).
+
+### Healthcare Access & Longevity Metrics
+Top hospitals, specialists, life expectancy, air quality, and wellness infrastructure (5-7 sentences).
+
+### Community & Social Wellness
+Local groups, events, and opportunities for connection and belonging (5-7 sentences).
+
+### Climate & Seasonal Wellness Tips
+Year-round activity potential, weather patterns, and tips for thriving in all seasons (5-7 sentences).
+
+### Transportation & Daily Convenience
+Walkability, transit, and ease of daily errands for an active lifestyle (4-6 sentences).
+
+### Future-Proofing for Aging in Place
+Availability of accessible homes and long-term livability features (4-6 sentences).
+
+### Sample Daily Wellness Routine in This Area
+An inspiring example day tailored to the recommended locations (6-8 sentences).
+"""
+
+                base_prompt = f"""
                 Client description:
                 {client_needs}
                 Budget: ${budget:,}
@@ -92,29 +158,44 @@ def show():
 
                 You are Fred, a professional goal-focused real estate advisor specializing in wellness and active lifestyle properties across the United States.
 
-                Follow this EXACT structure with no deviations. Only include the sections requested:
-
-                {sections_prompt}
-
-                Use clear, professional language. Do not add extra commentary.
+                Use clear, professional, warm language. Be encouraging and insightful.
                 """
 
                 try:
+                    # Generate SELECTED report for display
+                    selected_full_prompt = base_prompt + "\nFollow this EXACT structure. Only include the requested sections:\n\n" + selected_prompt
                     response = client.chat.completions.create(
                         model=MODEL_NAME,
                         messages=[
                             {"role": "system", "content": "You are Fred, a professional goal-focused real estate advisor."},
-                            {"role": "user", "content": full_prompt}
+                            {"role": "user", "content": selected_full_prompt}
                         ],
-                        max_tokens=2000,
+                        max_tokens=3000,
                         temperature=0.7
                     )
-                    full_report = response.choices[0].message.content
+                    displayed_report = response.choices[0].message.content
+
+                    # Generate FULL report for email and history
+                    full_email_prompt = base_prompt + "\nInclude ALL sections for a complete longevity home report:\n\n" + full_sections_prompt
+                    full_response = client.chat.completions.create(
+                        model=MODEL_NAME,
+                        messages=[
+                            {"role": "system", "content": "You are Fred, a professional goal-focused real estate advisor."},
+                            {"role": "user", "content": full_email_prompt}
+                        ],
+                        max_tokens=4000,
+                        temperature=0.7
+                    )
+                    full_report = full_response.choices[0].message.content
+
+                    # Display selected version
                     st.success("Fred found your perfect matches! Here's your personalized report:")
-                    st.markdown(full_report)
+                    st.markdown(displayed_report)
 
-                    st.session_state.chat_history["fred"].append({"role": "assistant", "content": f"Here's your full wellness home report:\n\n{full_report}"})
+                    # Save full version to history
+                    st.session_state.chat_history["fred"].append({"role": "assistant", "content": f"Here's your COMPLETE wellness home report:\n\n{full_report}"})
 
+                    # Email form with FULL report
                     st.markdown("### Get Your Full Report Emailed (Save & Share)")
                     with st.form("lead_form", clear_on_submit=True):
                         name = st.text_input("Your Name")
@@ -129,8 +210,8 @@ def show():
                                     "from": "reports@lbllifestyle.com",
                                     "to": [email],
                                     "cc": [YOUR_EMAIL],
-                                    "subject": f"{name}'s LBL Lifestyle Home Report",
-                                    "text": f"Hi {name},\n\nThank you for exploring LBL Lifestyle Solutions – Your Holistic Longevity Blueprint.\n\nHere's your full personalized wellness home report:\n\n{full_report}\n\nReply anytime to discuss how we can build your complete longevity plan.\n\nBest regards,\nFred & the LBL Team"
+                                    "subject": f"{name or 'Valued Client'}'s Complete LBL Wellness Home Report",
+                                    "text": f"Hi {name or 'there'},\n\nThank you for exploring LBL Lifestyle Solutions – Your Holistic Longevity Blueprint.\n\nAs a bonus, here's your COMPLETE personalized wellness home report with all expert insights:\n\n{full_report}\n\nFeel free to reply anytime — I'm here to help you find your perfect longevity home.\n\nBest regards,\nFred & the LBL Team"
                                 }
                                 headers = {
                                     "Authorization": f"Bearer {RESEND_API_KEY}",
@@ -139,7 +220,7 @@ def show():
                                 try:
                                     response = requests.post("https://api.resend.com/emails", json=data, headers=headers)
                                     if response.status_code == 200:
-                                        st.success(f"Full report sent to {email}! Check your inbox.")
+                                        st.success(f"Complete report sent to {email}! Check your inbox.")
                                         st.balloons()
                                     else:
                                         st.error(f"Send failed: {response.text}")
@@ -149,9 +230,9 @@ def show():
                     st.error("Fred is reviewing listings... try again soon.")
                     st.caption(f"Note: {str(e)}")
 
-    # Chat Section
+    # Streamlined chat section
     st.markdown("### Have a follow-up question? Start a chat with me in the Ask Fred banner below!")
-        
+
     for msg in st.session_state.chat_history["fred"]:
         if msg["role"] == "user":
             st.markdown(f"<div class='user-message'>{msg['content']}</div>", unsafe_allow_html=True)
@@ -180,8 +261,6 @@ def show():
                 st.error("Sorry, I'm having trouble right now. Try again soon.")
 
         st.rerun()
-
-    st.markdown("</div>", unsafe_allow_html=True)
 
     # Footer
     st.markdown("---")
