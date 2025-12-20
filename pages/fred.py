@@ -29,7 +29,7 @@ if st.button("← Back to Team"):
     st.session_state.chat_history = {}
     st.rerun()
 
-# Auto-scroll to interaction
+# Auto-scroll to hero image
 st.markdown("<div id='agent-interaction'></div>", unsafe_allow_html=True)
 st.markdown("""
 <script>
@@ -45,8 +45,7 @@ st.markdown("### 🏡 FRED – Your Wellness Home Scout")
 st.success("**This tool is completely free – no cost, no obligation! You will receive the full personalized report below and via email.**")
 st.write("The perfect home that supports your lifestyle awaits — anywhere in the U.S.!")
 
-client_needs = st.text_area("DESCRIBE YOUR DREAM WELLNESS NEEDS IN DETAIL. LET FRED DO THE REST!!!", height=220,
-                            placeholder="Example: Active couple in our 40s, love trails and home workouts, need gym space, near nature, budget $500k...")
+client_needs = st.text_area("DESCRIBE YOUR DREAM WELLNESS NEEDS IN DETAIL. LET FRED DO THE REST!!!", height=220, placeholder="Example: Active couple in our 40s, love trails and home workouts, need gym space, near nature, budget $500k...")
 col1, col2 = st.columns(2)
 with col1:
     budget = st.number_input("Maximum budget ($)", min_value=100000, value=500000, step=10000)
@@ -54,10 +53,15 @@ with col2:
     location = st.text_input("Preferred state or area (e.g., North Carolina, Asheville, Tampa FL)", value="")
 
 st.markdown("### Refine Your Report (Optional)")
+st.write("Choose what you'd like to focus on — or get the full report!")
 report_sections = st.multiselect(
     "Select sections to include:",
-    ["Introduction summary", "Top 5 Neighborhoods/Suburbs and Why They Fit (with fun facts)",
-     "Top 5 Must-Have Home Features", "Wellness/Outdoor Highlights"],
+    [
+        "Introduction summary",
+        "Top 5 Neighborhoods/Suburbs and Why They Fit (with fun facts)",
+        "Top 5 Must-Have Home Features",
+        "Wellness/Outdoor Highlights"
+    ],
     default=["Top 5 Neighborhoods/Suburbs and Why They Fit (with fun facts)", "Top 5 Must-Have Home Features", "Wellness/Outdoor Highlights"]
 )
 
@@ -70,27 +74,32 @@ if st.button("🔍 GENERATE MY REPORT", type="primary"):
             if "Introduction summary" in report_sections:
                 sections_prompt += "### Introduction\n5-6 sentences introducing how well their needs match the area and budget.\n\n"
             if "Top 5 Neighborhoods/Suburbs and Why They Fit (with fun facts)" in report_sections:
-                sections_prompt += "### Top 5 Neighborhoods/Suburbs and Why They Fit\n1. [Neighborhood] - [5-8 sentences] [Fun facts: 3-5 sentences]\n(repeat 2-5)\n\n"
+                sections_prompt += "### Top 5 Neighborhoods/Suburbs and Why They Fit\n1. [Neighborhood Name Here] - [Detailed explanation... 5-8 sentences.] [Fun facts: weather trends, cost of living, safety, commute/transportation, healthcare, culture/lifestyle, and overall vibe. 3-5 sentences.]\n# (repeat for 2-5)\n\n"
             if "Top 5 Must-Have Home Features" in report_sections:
-                sections_prompt += "### Top 5 Must-Have Home Features\n1. [Feature] - [5-8 sentences]\n(repeat 2-5)\n\n"
+                sections_prompt += "### Top 5 Must-Have Home Features\n1. [Feature Name Here] - [In-depth reason... 5-8 sentences.]\n# (repeat for 2-5)\n\n"
             if "Wellness/Outdoor Highlights" in report_sections:
-                sections_prompt += "### Wellness/Outdoor Highlights\n6-10 sentences on trails, parks, etc.\n\n"
+                sections_prompt += "### Wellness/Outdoor Highlights\n6-10 sentences covering key trails, parks, etc.\n\n"
 
             full_prompt = f"""
-            Client description: {client_needs}
+            Client description:
+            {client_needs}
             Budget: ${budget:,}
-            Location: {location or 'wellness-friendly U.S. areas'}
-            You are Fred, professional wellness real estate advisor.
-            Follow this exact structure only:
+            Preferred location(s): {location or 'wellness-friendly areas across the U.S.'}
+
+            You are Fred, a professional goal-focused real estate advisor specializing in wellness and active lifestyle properties across the United States.
+
+            Follow this EXACT structure with no deviations. Only include the sections requested:
+
             {sections_prompt}
-            Professional, clear tone. No extra commentary.
+
+            Use clear, professional language. Do not add extra commentary.
             """
 
             try:
                 response = client.chat.completions.create(
                     model=MODEL_NAME,
                     messages=[
-                        {"role": "system", "content": "You are Fred, a professional real estate advisor."},
+                        {"role": "system", "content": "You are Fred, a professional goal-focused real estate advisor."},
                         {"role": "user", "content": full_prompt}
                     ],
                     max_tokens=2000,
@@ -100,42 +109,66 @@ if st.button("🔍 GENERATE MY REPORT", type="primary"):
                 st.success("Fred found your perfect matches! Here's your personalized report:")
                 st.markdown(full_report)
 
-                # Add report to chat history so follow-ups remember it
+                # Add report to chat history for follow-ups
                 if "fred" not in st.session_state.chat_history:
                     st.session_state.chat_history["fred"] = []
                 st.session_state.chat_history["fred"].append({"role": "assistant", "content": f"Here's your full wellness home report:\n\n{full_report}"})
 
-                # Email form
-                st.markdown("### Get Your Full Report Emailed")
+                st.markdown("### Get Your Full Report Emailed (Save & Share)")
                 with st.form("lead_form", clear_on_submit=True):
                     name = st.text_input("Your Name")
                     email = st.text_input("Email (required)", placeholder="you@example.com")
                     phone = st.text_input("Phone (optional)")
-                    submitted = st.form_submit_button("📧 Send My Full Report")
+                    submitted = st.form_submit_button("📧 Send My Full Report", key="send_report_form")
                     if submitted:
+                        st.write("Sending your report...")
                         if not email:
-                            st.error("Email is required!")
+                            st.error("Email required!")
                         else:
                             data = {
                                 "from": "reports@lbllifestyle.com",
                                 "to": [email],
                                 "cc": [YOUR_EMAIL],
-                                "subject": f"{name or 'Client'}'s LBL Wellness Home Report",
-                                "text": f"Hi {name or 'there'},\n\nThank you for using LBL Lifestyle Solutions.\n\nHere's your report:\n\n{full_report}\n\nBest,\nFred & LBL Team"
+                                "subject": f"{name}'s LBL Lifestyle Home Report",
+                                "text": f"""
+Hi {name},
+
+Thank you for exploring LBL Lifestyle Solutions – Your Holistic Longevity Blueprint.
+
+Here's your full personalized Florida wellness home report:
+
+{full_report}
+
+Reply anytime to discuss how we can build your complete longevity plan.
+
+Best regards,
+Fred & the LBL Team
+                                """
                             }
-                            headers = {"Authorization": f"Bearer {RESEND_API_KEY}", "Content-Type": "application/json"}
+                            headers = {
+                                "Authorization": f"Bearer {RESEND_API_KEY}",
+                                "Content-Type": "application/json"
+                            }
                             try:
-                                resp = requests.post("https://api.resend.com/emails", json=data, headers=headers)
-                                if resp.status_code == 200:
-                                    st.success(f"Report sent to {email}!")
-                                    st.balloons()
+                                response = requests.post("https://api.resend.com/emails", json=data, headers=headers)
+                                if response.status_code == 200:
+                                    st.session_state.email_status = "success"
+                                    st.session_state.email_message = f"Full report sent to {email}! Check your inbox."
                                 else:
-                                    st.error(f"Failed: {resp.text}")
+                                    st.session_state.email_status = "error"
+                                    st.session_state.email_message = f"Send failed: {response.text} (Status: {response.status_code})"
                             except Exception as e:
-                                st.error(str(e))
+                                st.session_state.email_status = "error"
+                                st.session_state.email_message = f"Send error: {str(e)}"
+
+                if st.session_state.email_status == "success":
+                    st.success(st.session_state.email_message)
+                    st.balloons()
+                elif st.session_state.email_status == "error":
+                    st.error(st.session_state.email_message)
             except Exception as e:
-                st.error("Fred is busy... try again soon.")
-                st.caption(f"Error: {e}")
+                st.error("Fred is reviewing listings... try again soon.")
+                st.caption(f"Note: {str(e)}")
 
 # Chat Box
 st.markdown("### Have a follow-up question? Chat with me!")
@@ -159,7 +192,7 @@ if prompt := st.chat_input("Ask Fred a question..."):
             response = client.chat.completions.create(
                 model=MODEL_NAME,
                 messages=[
-                    {"role": "system", "content": "You are Fred, a professional goal-focused real estate advisor specializing in wellness and active lifestyle properties across the United States."},
+                    {"role": "system", "content": get_chat_system_prompt("fred")},
                     *st.session_state.chat_history["fred"]
                 ],
                 max_tokens=800,
@@ -169,13 +202,11 @@ if prompt := st.chat_input("Ask Fred a question..."):
             st.session_state.chat_history["fred"].append({"role": "assistant", "content": reply})
             st.markdown(f"<div class='assistant-message'>{reply}</div>", unsafe_allow_html=True)
         except Exception as e:
-            st.error("Trouble connecting. Try again.")
-            st.caption(f"Error: {e}")
+            st.error("Sorry, I'm having trouble right now. Try again soon.")
 
     st.rerun()
 
 st.markdown("</div>", unsafe_allow_html=True)
 
-# Footer
 st.markdown("---")
 st.markdown("<small>LBL Lifestyle Solutions • Your Holistic Longevity Blueprint<br>Powered by Grok (xAI) • Personalized wellness powered by AI</small>", unsafe_allow_html=True)
