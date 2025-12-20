@@ -64,9 +64,9 @@ def show():
 
     # Goals + Optional Notes
     goals = st.multiselect("PRIMARY NUTRITION GOALS", ["Longevity/anti-aging", "Energy & vitality", "Heart health", "Weight management", "Gut health", "Brain health", "Muscle maintenance", "General wellness"])
-    st.markdown('<div class="optional-box">', unsafe_allow_html=True)
+    
     goals_notes = st.text_area("Optional: Notes on your goals (e.g., specific preferences)", height=100)
-    st.markdown('</div>', unsafe_allow_html=True)
+    
 
     st.markdown('<div class="separator"></div>', unsafe_allow_html=True)
 
