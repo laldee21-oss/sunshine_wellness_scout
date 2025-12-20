@@ -87,11 +87,13 @@ def show():
         options=[opt[0] for opt in dietary_options],
         default=["Omnivore"],
         help="Hover over options for benefits & considerations"
-    
+    )
+
     if selected_dietary:
         for diet in selected_dietary:
             st.caption(f"**{diet}**: {dietary_tooltips[diet]}")
 
+    
     dietary_notes = st.text_area("Optional: Notes on your dietary preferences (e.g., foods to include/avoid)", height=100)
     st.markdown('</div>', unsafe_allow_html=True)
 
@@ -100,12 +102,14 @@ def show():
     allergies = st.text_area("ALLERGIES OR INTOLERANCES? (optional)", placeholder="Example: Gluten intolerant, lactose sensitive, nut allergy")
 
     budget_level = st.selectbox("WEEKLY GROCERY BUDGET LEVEL", ["Budget-conscious", "Moderate", "Premium/organic focus"])
+    
     budget_notes = st.text_input("Optional: Specific budget amount or notes (e.g., $100/week max)")
     st.markdown('</div>', unsafe_allow_html=True)
 
     st.markdown('<div class="separator"></div>', unsafe_allow_html=True)
 
     cooking_time = st.selectbox("TIME AVAILABLE FOR COOKING", ["<20 min/meal", "20–40 min/meal", "40+ min/meal (love cooking)"])
+    st.markdown('<div class="optional-box">', unsafe_allow_html=True)
     cooking_notes = st.text_input("Optional: Specific cooking notes (e.g., prefer batch cooking on weekends)")
     st.markdown('</div>', unsafe_allow_html=True)
 
