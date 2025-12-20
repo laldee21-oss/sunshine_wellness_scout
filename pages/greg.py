@@ -89,8 +89,7 @@ def show():
 
     # Chat Section
     st.markdown("### Have a follow-up question? Start a chat with me in the Ask Greg banner below!")
-    st.markdown("<div class='chat-container'>", unsafe_allow_html=True)
-
+    
     for msg in st.session_state.chat_history["greg"]:
         if msg["role"] == "user":
             st.markdown(f"<div class='user-message'>{msg['content']}</div>", unsafe_allow_html=True)
