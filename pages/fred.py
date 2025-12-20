@@ -150,9 +150,8 @@ def show():
                     st.caption(f"Note: {str(e)}")
 
     # Chat Section
-    st.markdown("### Have a follow-up question? Chat with me!")
-    st.markdown("<div class='chat-container'>", unsafe_allow_html=True)
-
+    st.markdown("### Have a follow-up question? Start a chat with me in the Ask Fred banner below!")
+    
     for msg in st.session_state.chat_history["fred"]:
         if msg["role"] == "user":
             st.markdown(f"<div class='user-message'>{msg['content']}</div>", unsafe_allow_html=True)
