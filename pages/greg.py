@@ -24,7 +24,7 @@ if st.button("← Back to Team"):
     st.session_state.chat_history = {}
     st.rerun()
 
-# Auto-scroll to hero image
+# Auto-scroll
 st.markdown("<div id='agent-interaction'></div>", unsafe_allow_html=True)
 st.markdown("""
 <script>
@@ -36,8 +36,8 @@ st.markdown("""
 # Hero image
 st.image("https://i.postimg.cc/mDy2FKQg/outdoor-fitness-scaled.webp", use_column_width=True, caption="Greatness Await – Welcome to your longevity lifestyle")
 
-st.markdown("### 💪 HI!!! IM GREG – Your Awesome Personal Trainer. GET SOME!!!!")
-st.write("Im a motivated gym rat helping you build strength, endurance, and longevity. Lets get started by building you a personalized workout routine. Please fill out the form below. I will write up a plan that is right for you. Congatulations on choosing a longevity lifestyle. Your tomorrow self will thank you")
+st.markdown("### 💪 HI!!! I'M GREG – Your Awesome Personal Trainer. LET'S GET SOME!!!!")
+st.write("I'm a motivated gym rat helping you build strength, endurance, and longevity. Congratulations on choosing a longevity lifestyle — your future self will thank you!")
 
 age = st.slider("Your age", 18, 80, 45)
 fitness_level = st.selectbox("CURRENT FITNESS LEVEL", ["Beginner", "Intermediate", "Advanced"])
@@ -49,17 +49,13 @@ session_length = st.selectbox("PREFERRED SESSION LENGTH", ["20-30 minutes", "30-
 
 if st.button("Generate My Custom Workout Plan", type="primary"):
     with st.spinner("Greg is building your plan..."):
-        trainer_prompt = f"""
-        You are Greg, a motivated gym rat and certified personal trainer focused on longevity.
-        Client: Age {age}, {fitness_level} level, goals: {', '.join(goals)}
+        prompt = f"""
+        You are Greg, motivated personal trainer focused on longevity.
+        Client: Age {age}, {fitness_level}, goals: {', '.join(goals)}
         Equipment: {', '.join(equipment) or 'Bodyweight'}
         Injuries: {injuries or 'None'}
-        Training {days_per_week} days/week, {session_length} sessions
-        Create a full weekly workout plan in markdown:
-        - Warm-up
-        - Main exercises (sets, reps, rest)
-        - Cool-down
-        - Progression tips
+        {days_per_week} days/week, {session_length} sessions
+        Create a full weekly markdown workout plan with warm-up, exercises (sets/reps/rest), cool-down, and progression tips.
         Be encouraging and safe.
         """
         try:
@@ -67,7 +63,7 @@ if st.button("Generate My Custom Workout Plan", type="primary"):
                 model=MODEL_NAME,
                 messages=[
                     {"role": "system", "content": "You are Greg, a motivated personal trainer."},
-                    {"role": "user", "content": trainer_prompt}
+                    {"role": "user", "content": prompt}
                 ],
                 max_tokens=1500,
                 temperature=0.7
@@ -75,9 +71,14 @@ if st.button("Generate My Custom Workout Plan", type="primary"):
             plan = response.choices[0].message.content
             st.success("Greg's custom plan for you!")
             st.markdown(plan)
+
+            # Add plan to chat history so follow-ups remember it
+            if "greg" not in st.session_state.chat_history:
+                st.session_state.chat_history["greg"] = []
+            st.session_state.chat_history["greg"].append({"role": "assistant", "content": f"Here's your full custom workout plan:\n\n{plan}"})
         except Exception as e:
-            st.error("Greg is pumping iron... try again soon.")
-            st.caption(f"Note: {str(e)}")
+            st.error("Greg is pumping iron... try again.")
+            st.caption(f"Error: {e}")
 
 # Chat Box
 st.markdown("### Have a follow-up question? Chat with me!")
@@ -101,7 +102,7 @@ if prompt := st.chat_input("Ask Greg a question..."):
             response = client.chat.completions.create(
                 model=MODEL_NAME,
                 messages=[
-                    {"role": "system", "content": "You are Greg, an energetic, motivating personal trainer. Only answer fitness/workout questions. Refer to Fred for homes or Nurse Zoey Zoe for health."},
+                    {"role": "system", "content": "You are Greg, a highly motivated, energetic personal trainer and gym enthusiast focused on building strength, endurance, and longevity."},
                     *st.session_state.chat_history["greg"]
                 ],
                 max_tokens=800,
@@ -111,7 +112,8 @@ if prompt := st.chat_input("Ask Greg a question..."):
             st.session_state.chat_history["greg"].append({"role": "assistant", "content": reply})
             st.markdown(f"<div class='assistant-message'>{reply}</div>", unsafe_allow_html=True)
         except Exception as e:
-            st.error("Sorry, I'm having trouble right now. Try again soon.")
+            st.error("Trouble connecting. Try again.")
+            st.caption(f"Error: {e}")
 
     st.rerun()
 
