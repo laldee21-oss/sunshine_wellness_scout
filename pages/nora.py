@@ -16,11 +16,16 @@ def show():
     <style>
         .stApp { background: linear-gradient(to bottom, #ffecd2, #fcb69f); color: #0c4a6e; }
         .stButton>button { background-color: #ea580c; color: white; border-radius: 15px; font-weight: bold; font-size: 1.2rem; height: 4em; width: 100%; }
-        .optional-input {
-            background-color: #f5f5f5;
-            border-radius: 8px;
-            padding: 10px;
-            margin-bottom: 15px;
+        .optional-box {
+            background-color: #f0f0f0;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border-left: 4px solid #ea580c;
+        }
+        .separator {
+            margin: 30px 0;
+            border-top: 1px solid #ddd;
         }
     </style>
     """, unsafe_allow_html=True)
@@ -56,7 +61,14 @@ def show():
     st.caption("💡 Tip: Include favorite foods, foods to avoid, cooking time available, and health priorities!")
 
     age = st.slider("Your age", 18, 80, 45)
+
+    # Goals + Optional Notes
     goals = st.multiselect("PRIMARY NUTRITION GOALS", ["Longevity/anti-aging", "Energy & vitality", "Heart health", "Weight management", "Gut health", "Brain health", "Muscle maintenance", "General wellness"])
+    st.markdown('<div class="optional-box">', unsafe_allow_html=True)
+    goals_notes = st.text_area("Optional: Notes on your goals (e.g., specific preferences)", height=100)
+    st.markdown('</div>', unsafe_allow_html=True)
+
+    st.markdown('<div class="separator"></div>', unsafe_allow_html=True)
 
     # Dietary preferences with tooltips
     dietary_options = [
@@ -81,30 +93,37 @@ def show():
         for diet in selected_dietary:
             st.caption(f"**{diet}**: {dietary_tooltips[diet]}")
 
+    st.markdown('<div class="optional-box">', unsafe_allow_html=True)
+    dietary_notes = st.text_area("Optional: Notes on your dietary preferences (e.g., foods to include/avoid)", height=100)
+    st.markdown('</div>', unsafe_allow_html=True)
+
+    st.markdown('<div class="separator"></div>', unsafe_allow_html=True)
+
     allergies = st.text_area("ALLERGIES OR INTOLERANCES? (optional)", placeholder="Example: Gluten intolerant, lactose sensitive, nut allergy")
 
     budget_level = st.selectbox("WEEKLY GROCERY BUDGET LEVEL", ["Budget-conscious", "Moderate", "Premium/organic focus"])
+    st.markdown('<div class="optional-box">', unsafe_allow_html=True)
+    budget_notes = st.text_input("Optional: Specific budget amount or notes (e.g., $100/week max)")
+    st.markdown('</div>', unsafe_allow_html=True)
+
+    st.markdown('<div class="separator"></div>', unsafe_allow_html=True)
 
     cooking_time = st.selectbox("TIME AVAILABLE FOR COOKING", ["<20 min/meal", "20–40 min/meal", "40+ min/meal (love cooking)"])
+    st.markdown('<div class="optional-box">', unsafe_allow_html=True)
+    cooking_notes = st.text_input("Optional: Specific cooking notes (e.g., prefer batch cooking on weekends)")
+    st.markdown('</div>', unsafe_allow_html=True)
+
+    st.markdown('<div class="separator"></div>', unsafe_allow_html=True)
+
     meals_per_day = st.slider("MEALS PER DAY YOU WANT PLANS FOR", 2, 5, 3)
 
-    # Optional inputs in light grey
-    st.markdown("### Optional Additional Details (in light grey)")
-    with st.container():
-        st.markdown('<div class="optional-input">', unsafe_allow_html=True)
-        goals_notes = st.text_area("Optional: Notes on your goals (e.g., specific preferences)", height=100)
-        dietary_notes = st.text_area("Optional: Notes on your dietary preferences (e.g., foods to include/avoid)", height=100)
-        budget_notes = st.text_input("Optional: Specific budget amount or notes (e.g., $100/week max)")
-        cooking_notes = st.text_input("Optional: Specific cooking notes (e.g., prefer batch cooking on weekends)")
-        st.markdown('</div>', unsafe_allow_html=True)
-
     # Macro input
-    st.markdown('<div class="optional-input">', unsafe_allow_html=True)
+    st.markdown('<div class="optional-box">', unsafe_allow_html=True)
     macro_input = st.text_input("Optional: Daily Macro Targets (e.g., 40% carbs, 30% protein, 30% fat)", placeholder="Leave blank for balanced default")
     st.markdown('</div>', unsafe_allow_html=True)
 
     # Greg upload
-    st.markdown('<div class="optional-input">', unsafe_allow_html=True)
+    st.markdown('<div class="optional-box">', unsafe_allow_html=True)
     st.write("**Optional: Team Up with Greg!**")
     st.write("If you've generated a workout plan with Greg, upload it here — Nora will coordinate nutrition to support your training.")
     greg_plan_file = st.file_uploader("Upload Greg's plan (TXT, PDF, PNG, JPG)", type=["txt", "pdf", "png", "jpg", "jpeg"], key="greg_upload_nora")
@@ -116,11 +135,8 @@ def show():
         try:
             if greg_plan_file.type == "text/plain":
                 greg_plan_text = greg_plan_file.read().decode("utf-8")
-            elif greg_plan_file.type == "application/pdf":
-                # Simple fallback message (PyPDF2 not needed)
-                greg_plan_text = "[Greg's workout plan uploaded — Nora will optimize nutrition for training recovery and energy]"
             else:
-                greg_plan_text = "[Image of Greg's plan uploaded — Nora will coordinate accordingly]"
+                greg_plan_text = "[Greg's workout plan uploaded — Nora will optimize nutrition accordingly]"
         except:
             greg_plan_text = "[Plan uploaded — content noted]"
 
@@ -142,7 +158,6 @@ def show():
 
     if st.button("Generate My Custom Meal Plan", type="primary"):
         with st.spinner("Nora is crafting your personalized nutrition plan..."):
-            # Core prompt
             core_prompt = f"""
 ### Weekly Meal Plan
 7-day plan with {meals_per_day} meals/day.
@@ -156,7 +171,6 @@ Organized by category, estimated for 1 person.
 Key habits this plan supports and why they matter.
 """
 
-            # Optional sections
             optional_prompt = ""
             if "Blue Zones Focus" in plan_sections:
                 optional_prompt += "### Blue Zones Focus\nTips and recipes from longevity hotspots.\n\n"
@@ -173,7 +187,6 @@ Key habits this plan supports and why they matter.
             if "Family-Friendly Adaptations" in plan_sections:
                 optional_prompt += "### Family-Friendly Adaptations\nHow to adjust for kids/partners.\n\n"
 
-            # Full plan for email
             full_plan_prompt = core_prompt + """
 ### Blue Zones Focus
 Tips and recipes.
