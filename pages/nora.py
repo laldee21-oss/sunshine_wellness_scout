@@ -37,9 +37,9 @@ def show():
     # Hero image
     st.image("https://i.postimg.cc/8cQ7n3jK/healthy-food-bowl.jpg", caption="Fuel Your Longevity – Welcome to your nutrition journey")
 
-    st.markdown("### 🥗 Hello! I'm Nora – Your Nutrition Coach for Longevity")
+    st.markdown("### 🥗 HI! I'M NORA – Your Nutrition Coach for Longevity")
     st.success("**This tool is completely free – no cost, no obligation! Your full plan will be emailed if requested.**")
-    st.write("I help you build sustainable, delicious eating habits inspired by Blue Zones and modern science — no fad diets, just food that helps you live better longer.")
+    st.write("I help you find nutritious, sustainable eating habits that fit your life — focusing on balance, joy, and long-term health, without pushing any one direction.")
 
     # Disclaimer
     st.warning("**Important**: I am not a registered dietitian or medical professional. My suggestions are general wellness education based on publicly available research. Always consult a qualified healthcare provider or registered dietitian before making dietary changes, especially if you have medical conditions.")
@@ -51,7 +51,8 @@ def show():
 
     age = st.slider("Your age", 18, 80, 45)
     goals = st.multiselect("PRIMARY NUTRITION GOALS", ["Longevity/anti-aging", "Energy & vitality", "Heart health", "Weight management", "Gut health", "Brain health", "Muscle maintenance", "General wellness"])
-    
+    goals_notes = st.text_input("Notes on your goals (optional, e.g., specific preferences)")
+
     # Dietary preferences with tooltips
     dietary_options = [
         ("Mediterranean", "Rich in fruits, veggies, olive oil, fish, nuts. Proven for heart health & longevity (Blue Zones favorite)."),
@@ -67,7 +68,7 @@ def show():
     selected_dietary = st.multiselect(
         "DIETARY PREFERENCES (hover for details)",
         options=[opt[0] for opt in dietary_options],
-        default=["Mediterranean"],
+        default=["Omnivore"],
         help="Hover over options for benefits & considerations"
     )
 
@@ -75,9 +76,16 @@ def show():
         for diet in selected_dietary:
             st.caption(f"**{diet}**: {dietary_tooltips[diet]}")
 
+    dietary_notes = st.text_input("Notes on your dietary preferences (optional, e.g., specific foods to include/avoid)")
+
     allergies = st.text_area("ALLERGIES OR INTOLERANCES? (optional)", placeholder="Example: Gluten intolerant, lactose sensitive, nut allergy")
+
     budget_level = st.selectbox("WEEKLY GROCERY BUDGET LEVEL", ["Budget-conscious", "Moderate", "Premium/organic focus"])
+    budget_notes = st.text_input("Specific budget amount or notes (optional, e.g., $100/week max)")
+
     cooking_time = st.selectbox("TIME AVAILABLE FOR COOKING", ["<20 min/meal", "20–40 min/meal", "40+ min/meal (love cooking)"])
+    cooking_notes = st.text_input("Specific cooking notes (optional, e.g., prefer batch cooking on weekends)")
+
     meals_per_day = st.slider("MEALS PER DAY YOU WANT PLANS FOR", 2, 5, 3)
 
     st.markdown("### Refine Your Meal Plan (Optional)")
@@ -85,7 +93,7 @@ def show():
     plan_sections = st.multiselect(
         "Add optional sections:",
         [
-            "Blue Zones Recipe Spotlight",
+            "Blue Zones Focus",
             "Supplement Education (general)",
             "Meal Prep Strategies",
             "Eating Out Tips",
@@ -93,15 +101,16 @@ def show():
             "Seasonal/Longevity Food Focus",
             "Family-Friendly Adaptations"
         ],
-        default=["Blue Zones Recipe Spotlight", "Meal Prep Strategies"]
+        default=["Meal Prep Strategies"]
     )
 
     if st.button("Generate My Custom Meal Plan", type="primary"):
         with st.spinner("Nora is crafting your personalized nutrition plan..."):
+            # Core prompt
             core_prompt = f"""
 ### Weekly Meal Plan
 7-day plan with {meals_per_day} meals/day (breakfast, lunch, dinner + snacks if applicable).
-Focus on Blue Zones/longevity principles. Include portion guidance and variety.
+Focus on longevity principles. Include portion guidance and variety.
 
 ### Grocery List
 Organized by category, estimated for 1 person.
@@ -110,9 +119,10 @@ Organized by category, estimated for 1 person.
 Key habits this plan supports and why they matter.
 """
 
+            # Optional sections
             optional_prompt = ""
-            if "Blue Zones Recipe Spotlight" in plan_sections:
-                optional_prompt += "### Blue Zones Recipe Spotlight\n3–5 simple, delicious recipes from longevity hotspots.\n\n"
+            if "Blue Zones Focus" in plan_sections:
+                optional_prompt += "### Blue Zones Focus\nTips and recipes from longevity hotspots.\n\n"
             if "Supplement Education (general)" in plan_sections:
                 optional_prompt += "### Supplement Education (general)\nCommon longevity supplements and evidence overview — consult doctor.\n\n"
             if "Meal Prep Strategies" in plan_sections:
@@ -126,9 +136,10 @@ Key habits this plan supports and why they matter.
             if "Family-Friendly Adaptations" in plan_sections:
                 optional_prompt += "### Family-Friendly Adaptations\nHow to adjust for kids/partners.\n\n"
 
+            # Full plan for email
             full_plan_prompt = core_prompt + """
-### Blue Zones Recipe Spotlight
-3–5 recipes.
+### Blue Zones Focus
+Tips and recipes.
 ### Supplement Education (general)
 Overview.
 ### Meal Prep Strategies
@@ -157,7 +168,7 @@ Be encouraging, practical, and anti-diet-culture. Focus on joy, flavor, and long
 """
 
             try:
-                # Display plan
+                # Display plan (core + selected)
                 display_response = client.chat.completions.create(
                     model=MODEL_NAME,
                     messages=[{"role": "system", "content": "You are Nora, warm nutrition coach."}, {"role": "user", "content": base_prompt + "\n" + core_prompt + optional_prompt}],
