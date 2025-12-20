@@ -19,11 +19,18 @@ def show():
     </style>
     """, unsafe_allow_html=True)
 
-    # FORCE SCROLL TO TOP WHEN PAGE LOADS
+    # STRONG SCROLL TO TOP FIX
     st.markdown("""
     <script>
-        window.parent.document.querySelector('section.main').scrollTop = 0;
         window.scrollTo(0, 0);
+        const mainSection = window.parent.document.querySelector('section.main');
+        if (mainSection) {
+            mainSection.scrollTop = 0;
+        }
+        setTimeout(() => {
+            window.scrollTo(0, 0);
+            if (mainSection) mainSection.scrollTop = 0;
+        }, 100);
     </script>
     """, unsafe_allow_html=True)
 
