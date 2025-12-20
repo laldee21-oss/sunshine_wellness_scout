@@ -29,7 +29,7 @@ def fetch_pexels_image(neighborhood="", location_hint="", theme_hints=""):
         queries.append(f"{location_hint} scenic view aerial")
     if theme_hints:
         queries.append(f"{location_hint or 'USA'} {theme_hints} landscape nature")
-    queries.append("wellness home nature landscape sunset")  # Final fallback
+    queries.append("wellness home nature landscape sunset")
 
     seen_urls = set()
     for query in queries:
@@ -54,7 +54,6 @@ def add_images_to_report(report_text, location_hint="", client_needs=""):
     in_top_5 = False
     seen_urls = set()
 
-    # Theme detection from user input for better fallbacks
     lower_needs = client_needs.lower()
     theme_hints = ""
     if any(word in lower_needs for word in ["beach", "ocean", "tampa", "florida", "coast"]):
@@ -103,8 +102,8 @@ def show():
     </script>
     """, unsafe_allow_html=True)
 
-    # Back button
-    if st.button("← Back to Team"):
+    # Back button — with unique key to prevent duplicate ID error
+    if st.button("← Back to Team", key="fred_back_button"):
         st.session_state.current_page = "home"
         st.rerun()
 
@@ -221,17 +220,13 @@ def show():
                     )
                     report = response.choices[0].message.content
 
-                    # Add photos with smart fallbacks
                     report_with_images = add_images_to_report(report, location_hint, client_needs)
 
-                    # Display report once
                     st.success("Fred found your perfect matches! Here's your personalized report:")
                     st.markdown(report_with_images)
 
-                    # Save full report with images to history
                     st.session_state.chat_history["fred"].append({"role": "assistant", "content": f"Here's your full wellness home report:\n\n{report_with_images}"})
 
-                    # Email form
                     st.markdown("### Get Your Full Report Emailed (Save & Share)")
                     with st.form("lead_form", clear_on_submit=True):
                         name = st.text_input("Your Name")
