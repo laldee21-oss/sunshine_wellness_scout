@@ -77,7 +77,7 @@ def show():
     st.markdown("""
     <script>
         window.scrollTo(0, 0);
-        const mainSection = window.parent.document.querySelector('section.main');
+        const mainSection = window.parent.document.query_selector('section.main');
         if (mainSection) mainSection.scrollTop = 0;
         setTimeout(() => { window.scrollTo(0, 0); if (mainSection) mainSection.scrollTop = 0; }, 100);
     </script>
@@ -95,8 +95,14 @@ def show():
     st.success("**This tool is completely free – no cost, no obligation! Your full insights will be emailed if requested.**")
     st.write("I provide general wellness education and help you understand symptoms, labs, and preventive habits — all to support your longevity journey.")
 
-    # Disclaimer
-    st.warning("**Important**: I am not a doctor and do not provide medical diagnoses, treatments, or prescriptions. This is general education only. Always consult a licensed healthcare professional for personal medical advice.")
+    # Name Input
+    st.markdown("### What's your name?")
+    st.write("So I can make this feel more personal 😊")
+    user_name = st.text_input("Your first name (optional)", value=st.session_state.get("user_name", ""), key="zoey_name_input")
+    if user_name:
+        st.session_state.user_name = user_name.strip()
+    else:
+        st.session_state.user_name = "there"
 
     # Quick Start Ideas
     with st.expander("💡 Quick Start Ideas – Not sure where to begin?"):
@@ -185,7 +191,7 @@ Overview — consult doctor.
 Red flags.
 """
                 base_prompt = f"""
-You are Nurse Zoey Zoe, a compassionate, evidence-based registered nurse and health educator.
+User name: {st.session_state.user_name}
 Data/Question: {combined or 'General wellness inquiry'}
 Specific question: {question or 'Overall health insights'}
 Provide general education only. Never diagnose or prescribe.
@@ -242,7 +248,7 @@ Use phrases like "Generally speaking..." or "Standard guidelines suggest...".
                     st.error("Email required!")
                 else:
                     insights_to_send = st.session_state.full_insights_for_email
-                    email_body = f"""Hi {name or 'there'},
+                    email_body = f"""Hi {st.session_state.user_name},
 
 Thank you for trusting Nurse Zoey Zoe at LBL Lifestyle Solutions.
 
@@ -258,7 +264,7 @@ Nurse Zoey Zoe & the LBL Team"""
                         "from": "reports@lbllifestyle.com",
                         "to": [email],
                         "cc": [YOUR_EMAIL],
-                        "subject": f"{name or 'Client'}'s Complete LBL Wellness Insights",
+                        "subject": f"{st.session_state.user_name or 'Client'}'s Complete LBL Wellness Insights",
                         "text": email_body
                     }
                     headers = {"Authorization": f"Bearer {RESEND_API_KEY}", "Content-Type": "application/json"}
