@@ -11,13 +11,13 @@ def show():
     if "chat_history" not in st.session_state:
         st.session_state.chat_history = {"nora": []}
 
-    # NEW PROFESSIONAL DESIGN
+    # PROFESSIONAL DESIGN
     st.markdown("""
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Inter:wght@400;500;600&display=swap');
         
         .stApp {
-            background: linear-gradient(to bottom, #f8f9fa, #e6f0fa);
+            background: linear-gradient(to bottom, #f5f7fa, #e0e7f0);
             color: #1e3a2f;
             font-family: 'Inter', sans-serif;
         }
@@ -26,26 +26,45 @@ def show():
             color: #2d6a4f;
             font-weight: 600;
         }
+        .stTextInput > div > div > input,
+        .stTextArea > div > div > textarea,
+        .stSelectbox > div > div,
+        .stSlider > div > div > div {
+            border: 2px solid #a0c4d8 !important;
+            border-radius: 10px !important;
+            padding: 12px !important;
+            background-color: white !important;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05) !important;
+        }
+        .stTextInput > div > div > input:focus,
+        .stTextArea > div > div > textarea:focus {
+            border-color: #2d6a4f !important;
+        }
+        .optional-box {
+            background-color: #f0f7fc !important;
+            border: 2px solid #a0c4d8 !important;
+            border-left: 6px solid #2d6a4f !important;
+            border-radius: 12px;
+            padding: 18px;
+            margin-bottom: 25px;
+        }
+        label {
+            font-weight: 600 !important;
+            color: #2d6a4f !important;
+            font-size: 1.05rem !important;
+        }
+        .separator {
+            margin: 35px 0;
+            border-top: 1px solid #c0d8e0;
+        }
         .stButton>button {
             background-color: #2d6a4f;
             color: white;
             border-radius: 12px;
             font-weight: 600;
-            font-size: 1.1rem;
-            height: 3.5em;
-            border: none;
-            box-shadow: 0 4px 8px rgba(45, 106, 79, 0.2);
         }
         .stButton>button:hover {
             background-color: #40916c;
-        }
-        .stSuccess, .stInfo {
-            background-color: #d8f0e6;
-            border-left: 5px solid #40916c;
-        }
-        .stWarning {
-            background-color: #fff3cd;
-            border-left: 5px solid #ffc107;
         }
         img {
             border-radius: 16px;
@@ -79,15 +98,32 @@ def show():
     # Disclaimer
     st.warning("**Important**: I am not a registered dietitian or medical professional. My suggestions are general wellness education based on publicly available research. Always consult a qualified healthcare provider or registered dietitian before making dietary changes, especially if you have medical conditions.")
 
+    # Quick Start Ideas
+    with st.expander("💡 Quick Start Ideas – Not sure where to begin?"):
+        st.markdown("""
+        Here are popular ways users get started:
+        - Create a 7-day plan with $100 grocery budget
+        - Build meals around my 40/30/30 macros
+        - Suggest snacks that won't spike blood sugar
+        - Make family-friendly Mediterranean recipes
+        """)
+
     # Encouraging input
     st.markdown("### Tell Nora a little bit about you and your eating habits")
     st.write("**Be as detailed as possible!** The more you share about your age, goals, preferences, allergies, budget, and current diet, the better Nora can help. 😊")
     st.caption("💡 Tip: Include favorite foods, foods to avoid, cooking time available, and health priorities!")
 
     age = st.slider("Your age", 18, 80, 45)
-    goals = st.multiselect("PRIMARY NUTRITION GOALS", ["Longevity/anti-aging", "Energy & vitality", "Heart health", "Weight management", "Gut health", "Brain health", "Muscle maintenance", "General wellness"])
 
-    # Dietary preferences with tooltips
+    # Goals + Notes
+    goals = st.multiselect("PRIMARY NUTRITION GOALS", ["Longevity/anti-aging", "Energy & vitality", "Heart health", "Weight management", "Gut health", "Brain health", "Muscle maintenance", "General wellness"])
+    st.markdown('<div class="optional-box">', unsafe_allow_html=True)
+    goals_notes = st.text_area("Optional: Notes on your goals (e.g., specific preferences)", height=100)
+    st.markdown('</div>', unsafe_allow_html=True)
+
+    st.markdown('<div class="separator"></div>', unsafe_allow_html=True)
+
+    # Dietary preferences
     dietary_options = [
         ("Mediterranean", "Rich in fruits, veggies, olive oil, fish, nuts. Proven for heart health & longevity."),
         ("Plant-based", "Mostly or fully plants — great for inflammation, fiber, environment."),
@@ -110,21 +146,39 @@ def show():
         for diet in selected_dietary:
             st.caption(f"**{diet}**: {dietary_tooltips[diet]}")
 
+    st.markdown('<div class="optional-box">', unsafe_allow_html=True)
+    dietary_notes = st.text_area("Optional: Notes on your dietary preferences (e.g., foods to include/avoid)", height=100)
+    st.markdown('</div>', unsafe_allow_html=True)
+
+    st.markdown('<div class="separator"></div>', unsafe_allow_html=True)
+
     allergies = st.text_area("ALLERGIES OR INTOLERANCES? (optional)", placeholder="Example: Gluten intolerant, lactose sensitive, nut allergy")
 
+    st.markdown('<div class="separator"></div>', unsafe_allow_html=True)
+
     budget_level = st.selectbox("WEEKLY GROCERY BUDGET LEVEL", ["Budget-conscious", "Moderate", "Premium/organic focus"])
+    st.markdown('<div class="optional-box">', unsafe_allow_html=True)
+    budget_notes = st.text_input("Optional: Specific budget amount or notes (e.g., $100/week max)")
+    st.markdown('</div>', unsafe_allow_html=True)
+
+    st.markdown('<div class="separator"></div>', unsafe_allow_html=True)
 
     cooking_time = st.selectbox("TIME AVAILABLE FOR COOKING", ["<20 min/meal", "20–40 min/meal", "40+ min/meal (love cooking)"])
+    st.markdown('<div class="optional-box">', unsafe_allow_html=True)
+    cooking_notes = st.text_input("Optional: Specific cooking notes (e.g., prefer batch cooking on weekends)")
+    st.markdown('</div>', unsafe_allow_html=True)
+
+    st.markdown('<div class="separator"></div>', unsafe_allow_html=True)
+
     meals_per_day = st.slider("MEALS PER DAY YOU WANT PLANS FOR", 2, 5, 3)
 
-    # Optional inputs in light grey
-    st.markdown("### Optional Additional Details")
-    st.markdown('<div style="background-color:#f5f5f5;padding:15px;border-radius:10px;margin-bottom:20px;">', unsafe_allow_html=True)
-    goals_notes = st.text_area("Optional: Notes on your goals (e.g., specific preferences)", height=100)
-    dietary_notes = st.text_area("Optional: Notes on your dietary preferences (e.g., foods to include/avoid)", height=100)
-    budget_notes = st.text_input("Optional: Specific budget amount or notes (e.g., $100/week max)")
-    cooking_notes = st.text_input("Optional: Specific cooking notes (e.g., prefer batch cooking on weekends)")
+    # Macro input
+    st.markdown('<div class="optional-box">', unsafe_allow_html=True)
     macro_input = st.text_input("Optional: Daily Macro Targets (e.g., 40% carbs, 30% protein, 30% fat)", placeholder="Leave blank for balanced default")
+    st.markdown('</div>', unsafe_allow_html=True)
+
+    # Greg upload
+    st.markdown('<div class="optional-box">', unsafe_allow_html=True)
     st.write("**Optional: Team Up with Greg!**")
     st.write("If you've generated a workout plan with Greg, upload it here — Nora will coordinate nutrition to support your training.")
     greg_plan_file = st.file_uploader("Upload Greg's plan (TXT, PDF, PNG, JPG)", type=["txt", "pdf", "png", "jpg", "jpeg"], key="greg_upload_nora")
@@ -244,7 +298,16 @@ Be encouraging, practical, and anti-diet-culture. Focus on joy, flavor, and long
 
                 st.session_state.full_plan_for_email = full_plan
 
-                st.info("📧 Want the **complete version** with every section? Fill in the email form below to get it instantly!")
+                st.info("📧 Want the **complete version** with every section? Fill in the email form below!")
+
+                # Follow-up suggestions
+                st.markdown("### Would you like me to...")
+                st.markdown("""
+                - Adjust this plan for your allergies or budget?
+                - Coordinate with Greg for workout recovery meals?
+                - Add more recipes or meal prep ideas?
+                - Make this family-friendly?
+                """)
             except Exception as e:
                 st.error("Nora is in the kitchen... try again soon.")
                 st.caption(f"Error: {str(e)}")
