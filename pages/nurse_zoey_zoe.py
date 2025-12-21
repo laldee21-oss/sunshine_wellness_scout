@@ -11,7 +11,7 @@ def show():
     if "chat_history" not in st.session_state:
         st.session_state.chat_history = {"zoey": []}
 
-    # PROFESSIONAL DESIGN
+    # HIGH-CONTRAST PROFESSIONAL DESIGN
     st.markdown("""
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Inter:wght@400;500;600&display=swap');
@@ -28,17 +28,32 @@ def show():
         }
         .stTextInput > div > div > input,
         .stTextArea > div > div > textarea,
-        .stSelectbox > div > div,
-        .stSlider > div > div > div {
+        .stSelectbox > div > div > div[data-baseweb="select"] > div,
+        .stNumberInput > div > div > input {
+            background-color: white !important;
+            color: #1e3a2f !important;
             border: 2px solid #a0c4d8 !important;
             border-radius: 10px !important;
             padding: 12px !important;
-            background-color: white !important;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.05) !important;
         }
         .stTextInput > div > div > input:focus,
         .stTextArea > div > div > textarea:focus {
             border-color: #2d6a4f !important;
+        }
+        div[data-baseweb="select"] > div {
+            background-color: white !important;
+            color: #1e3a2f !important;
+        }
+        .stChatInput > div {
+            background-color: white !important;
+            border: 2px solid #2d6a4f !important;
+            border-radius: 20px !important;
+        }
+        .stChatInput > div > div > input {
+            color: #1e3a2f !important;
+        }
+        .stChatMessage {
+            background-color: transparent !important;
         }
         .optional-box {
             background-color: #f0f7fc !important;
@@ -77,13 +92,13 @@ def show():
     st.markdown("""
     <script>
         window.scrollTo(0, 0);
-        const mainSection = window.parent.document.query_selector('section.main');
+        const mainSection = window.parent.document.querySelector('section.main');
         if (mainSection) mainSection.scrollTop = 0;
         setTimeout(() => { window.scrollTo(0, 0); if (mainSection) mainSection.scrollTop = 0; }, 100);
     </script>
     """, unsafe_allow_html=True)
 
-    # Back button — unique key
+    # Back button
     if st.button("← Back to Team", key="zoey_back_button"):
         st.session_state.current_page = "home"
         st.rerun()
@@ -91,9 +106,11 @@ def show():
     # Hero image
     st.image("https://i.postimg.cc/BnFgfCTD/pexels-kampus-7551620.jpg", caption="LIVE BETTER LONGER – Welcome to your longevity lifestyle")
 
+    # Welcome & Disclaimer
     st.markdown("### 🩺 Hello! I'm Nurse Zoey Zoe – your friendly health educator")
     st.success("**This tool is completely free – no cost, no obligation! Your full insights will be emailed if requested.**")
     st.write("I provide general wellness education and help you understand symptoms, labs, and preventive habits — all to support your longevity journey.")
+    st.warning("**Important**: I am not a doctor and do not provide medical diagnoses, treatments, or prescriptions. This is general education only. Always consult a licensed healthcare professional for personal medical advice.")
 
     # Name Input
     st.markdown("### What's your name?")
@@ -281,7 +298,7 @@ Nurse Zoey Zoe & the LBL Team"""
                         st.error(f"Send error: {str(e)}")
 
     # Streamlined chat
-    st.markdown("### Have a follow-up question? Chat with Nurse Zoey Zoe below!")
+    st.markdown("### Have a follow-up question? Chat with Nurse Zoey Zoe in the box below! 🩺")
     st.caption("Ask about symptoms, habits, prevention — I'm here to educate and support.")
 
     for msg in st.session_state.chat_history["zoey"]:
