@@ -77,7 +77,7 @@ def show():
     st.markdown("""
     <script>
         window.scrollTo(0, 0);
-        const mainSection = window.parent.document.querySelector('section.main');
+        const mainSection = window.parent.document.query_selector('section.main');
         if (mainSection) mainSection.scrollTop = 0;
         setTimeout(() => { window.scrollTo(0, 0); if (mainSection) mainSection.scrollTop = 0; }, 100);
     </script>
@@ -91,12 +91,20 @@ def show():
     # Hero image
     st.image("https://i.postimg.cc/mDy2FKQg/outdoor-fitness-scaled.webp", caption="Greatness Await – Welcome to your longevity lifestyle")
 
+    # Welcome & Disclaimer
     st.markdown("### 💪 HI!!! I'M GREG – Your Awesome Personal Trainer. GET SOME!!!!")
-    st.success("**This tool is completely free – no cost, no obligation! Your full plan will be emailed if requested.**")
     st.write("I'm a motivated gym rat helping you build strength, endurance, and longevity. Let's get started by building you a personalized workout routine. Congratulations on choosing a longevity lifestyle. Your future self will thank you!")
-
-    # Disclaimer
     st.warning("**Important**: I am not a certified personal trainer or medical professional. My suggestions are general wellness education. Always consult a qualified trainer or doctor before starting a new exercise program, especially if you have injuries or conditions.")
+    st.success("**This tool is completely free – no cost, no obligation! You full plan will be emailed if requested.**")
+
+    # Name Input
+    st.markdown("### What's your name?")
+    st.write("So I can make this feel more personal 😊")
+    user_name = st.text_input("Your first name (optional)", value=st.session_state.get("user_name", ""), key="greg_name_input")
+    if user_name:
+        st.session_state.user_name = user_name.strip()
+    else:
+        st.session_state.user_name = "there"
 
     # Quick Start Ideas
     with st.expander("💡 Quick Start Ideas – Not sure where to begin?"):
@@ -182,16 +190,15 @@ Next phases.
 """
 
             base_prompt = f"""
-You are Greg, an energetic, motivating, and knowledgeable personal trainer focused on sustainable strength, mobility, and longevity for people over 40.
-Client profile:
-Age: {age}
-Fitness level: {fitness_level}
-Goals: {', '.join(goals)}
-Equipment: {', '.join(equipment) or 'Bodyweight only'}
-Injuries: {injuries or 'None'}
-Training {days_per_week} days/week, {session_length} sessions
+User name: {st.session_state.user_name}
+Client description:
+{client_needs}
+Budget: ${budget:,}
+Preferred location(s): {location or 'wellness-friendly areas across the U.S.'}
 
-Be encouraging but realistic, emphasize form and safety.
+You are Greg, an energetic, motivating, and knowledgeable personal trainer focused on sustainable strength, mobility, and longevity for people over 40.
+
+Use warm, encouraging, insightful language.
 """
 
             try:
@@ -245,7 +252,7 @@ Be encouraging but realistic, emphasize form and safety.
                     st.error("Email required!")
                 else:
                     plan_to_send = st.session_state.full_plan_for_email
-                    email_body = f"""Hi {name or 'there'},
+                    email_body = f"""Hi {st.session_state.user_name},
 
 Thank you for training with Greg at LBL Lifestyle Solutions!
 
@@ -261,7 +268,7 @@ Greg & the LBL Team"""
                         "from": "reports@lbllifestyle.com",
                         "to": [email],
                         "cc": [YOUR_EMAIL],
-                        "subject": f"{name or 'Client'}'s Complete LBL Fitness Plan",
+                        "subject": f"{st.session_state.user_name or 'Client'}'s Complete LBL Fitness Plan",
                         "text": email_body
                     }
                     headers = {"Authorization": f"Bearer {RESEND_API_KEY}", "Content-Type": "application/json"}
