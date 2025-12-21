@@ -119,20 +119,20 @@ if st.session_state.current_page == "home":
     st.markdown("<h1 class='main-header'>LBL LIFESTYLE SOLUTIONS</h1>", unsafe_allow_html=True)
     st.markdown("<p class='tagline'>LIVE BETTER LONGER</p>", unsafe_allow_html=True)
     
-    # NEW VIDEO EMBED — clean, looping, no distractions
+    # VIMEO HERO VIDEO — clean, looping, muted autoplay, no distractions
     st.markdown("""
-    <div style="display: flex; justify-content: center; margin: 40px 0;">
-        <iframe width="800" height="450" 
-                src="https://www.youtube.com/embed/IhiRZbkENGo?autoplay=1&mute=1&loop=1&playlist=IhiRZbkENGo&controls=0&rel=0&modestbranding=1" 
-                title="LBL Lifestyle Solutions – Your Longevity Team" 
+    <div style="display: flex; justify-content: center; margin: 40px 0; border-radius: 16px; overflow: hidden; box-shadow: 0 8px 20px rgba(0,0,0,0.1);">
+        <iframe src="https://player.vimeo.com/video/1148502814?autoplay=1&loop=1&muted=1&background=1&title=0&byline=0&portrait=0" 
+                width="800" 
+                height="450" 
                 frameborder="0" 
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                allow="autoplay; fullscreen" 
                 allowfullscreen>
-    </iframe>
+        </iframe>
     </div>
     """, unsafe_allow_html=True)
     
-    
+      
     # VERSION 1 OPENING STATEMENT
     st.markdown("""
     <div class='opening-statement'>
@@ -220,6 +220,7 @@ elif st.session_state.current_page == "zoey":
 elif st.session_state.current_page == "nora":
     import pages.nora as nora_page
     nora_page.show()
+
 
 
 
