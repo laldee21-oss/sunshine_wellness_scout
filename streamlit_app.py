@@ -119,9 +119,9 @@ if st.session_state.current_page == "home":
     st.markdown("<h1 class='main-header'>LBL LIFESTYLE SOLUTIONS</h1>", unsafe_allow_html=True)
     st.markdown("<p class='tagline'>LIVE BETTER LONGER</p>", unsafe_allow_html=True)
     
-    # Version 3: Muted, play once, tighter spacing (less top/bottom margin)
+    # Version 1: Muted, play once, standard spacing (safest for mobile)
     st.markdown("""
-    <div style="display: flex; justify-content: center; margin: 20px 0; border-radius: 16px; overflow: hidden; box-shadow: 0 8px 20px rgba(0,0,0,0.1);">
+    <div style="display: flex; justify-content: center; margin: 40px 0; border-radius: 16px; overflow: hidden; box-shadow: 0 8px 20px rgba(0,0,0,0.1);">
         <iframe src="https://player.vimeo.com/video/1148502814?autoplay=1&muted=1&background=1&title=0&byline=0&portrait=0" 
                 width="800" height="450" frameborder="0" allow="autoplay; fullscreen" allowfullscreen>
         </iframe>
@@ -216,6 +216,7 @@ elif st.session_state.current_page == "zoey":
 elif st.session_state.current_page == "nora":
     import pages.nora as nora_page
     nora_page.show()
+
 
 
 
