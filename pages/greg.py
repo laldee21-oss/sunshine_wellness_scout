@@ -88,13 +88,10 @@ def show():
     </style>
     """, unsafe_allow_html=True)
 
-    # Scroll to top
+    # Force scroll to top
     st.markdown("""
     <script>
-        window.scrollTo(0, 0);
-        const mainSection = window.parent.document.querySelector('section.main');
-        if (mainSection) mainSection.scrollTop = 0;
-        setTimeout(() => { window.scrollTo(0, 0); if (mainSection) mainSection.scrollTop = 0; }, 100);
+        window.parent.document.querySelector('section.main').scrollTop = 0;
     </script>
     """, unsafe_allow_html=True)
 
