@@ -72,20 +72,6 @@ if st.session_state.current_page == "home":
             color: #2d6a4f;
             font-weight: 600;
         }
-        .motivation-header {
-            font-size: 2rem;
-            text-align: center;
-            margin: 2rem 0 1rem 0;
-        }
-        .motivation-text {
-            text-align: center;
-            font-size: 1.4rem;
-            line-height: 1.9;
-            margin: 2rem 0 3rem 0;
-            max-width: 900px;
-            margin-left: auto;
-            margin-right: auto;
-        }
         .agent-name {
             font-family: 'Playfair Display', serif;
             font-size: 1.8rem;
@@ -108,13 +94,6 @@ if st.session_state.current_page == "home":
             text-align: center;
             margin: 1rem 0;
             font-style: italic;
-        }
-        .agent-desc {
-            font-size: 1.1rem;
-            line-height: 1.6;
-            text-align: center;
-            min-height: 120px;
-            margin: 1rem 0;
         }
         .stButton>button {
             background-color: #2d6a4f;
@@ -150,7 +129,7 @@ if st.session_state.current_page == "home":
     </div>
     """, unsafe_allow_html=True)
 
-    # VERSION 1 OPENING STATEMENT — best placement
+    # VERSION 1 OPENING STATEMENT
     st.markdown("""
     <div class='opening-statement'>
     The future is now — and it's personal.<br><br>
@@ -164,9 +143,9 @@ if st.session_state.current_page == "home":
 
     st.image("https://i.postimg.cc/tgsgw1dW/image.jpg", caption="Your Longevity Blueprint")
 
-    st.markdown("<h2 class='motivation-header'>How It Works – 3 Simple Steps</h2>", unsafe_allow_html=True)
+    st.markdown("<h2>How It Works – 3 Simple Steps</h2>", unsafe_allow_html=True)
     st.markdown("""
-    <div class='motivation-text'>
+    <div style='text-align: center; font-size: 1.4rem; line-height: 1.9; max-width: 900px; margin: auto;'>
     1. **Choose Your Agent** – Click one of the team members below to get started.<br><br>
     2. **Get Personalized Guidance** – Fill out the form or chat — your agent will create a custom report or plan just for you.<br><br>
     3. **Build Your Longevity Lifestyle** – Save your reports, come back anytime, and unlock more agents as you go!<br><br>
