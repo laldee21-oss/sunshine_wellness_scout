@@ -77,7 +77,7 @@ def show():
     st.markdown("""
     <script>
         window.scrollTo(0, 0);
-        const mainSection = window.parent.document.querySelector('section.main');
+        const mainSection = window.parent.document.query_selector('section.main');
         if (mainSection) mainSection.scrollTop = 0;
         setTimeout(() => { window.scrollTo(0, 0); if (mainSection) mainSection.scrollTop = 0; }, 100);
     </script>
@@ -95,8 +95,14 @@ def show():
     st.success("**This tool is completely free – no cost, no obligation! Your full plan will be emailed if requested.**")
     st.write("I help you build sustainable, delicious eating habits that fit your life — focusing on balance, joy, and long-term health, tailored to your preferences.")
 
-    # Disclaimer
-    st.warning("**Important**: I am not a registered dietitian or medical professional. My suggestions are general wellness education based on publicly available research. Always consult a qualified healthcare provider or registered dietitian before making dietary changes, especially if you have medical conditions.")
+    # Name Input
+    st.markdown("### What's your name?")
+    st.write("So I can make this feel more personal 😊")
+    user_name = st.text_input("Your first name (optional)", value=st.session_state.get("user_name", ""), key="nora_name_input")
+    if user_name:
+        st.session_state.user_name = user_name.strip()
+    else:
+        st.session_state.user_name = "there"
 
     # Quick Start Ideas
     with st.expander("💡 Quick Start Ideas – Not sure where to begin?"):
@@ -260,7 +266,7 @@ Adjustments.
 """
 
             base_prompt = f"""
-You are Nora, a warm, evidence-based nutrition coach focused on sustainable, enjoyable eating for long-term health.
+User name: {st.session_state.user_name}
 Client profile:
 Age: {age}
 Goals: {', '.join(goals)}
@@ -278,7 +284,7 @@ Be encouraging, practical, and anti-diet-culture. Focus on joy, flavor, and long
                 # Display plan
                 display_response = client.chat.completions.create(
                     model=MODEL_NAME,
-                    messages=[{"role": "system", "content": "You are Nora, warm nutrition coach."}, {"role": "user", "content": base_prompt + "\n" + core_prompt + optional_prompt}],
+                    messages=[{"role": "system", "content": "You are Nora, a warm, evidence-based nutrition coach focused on longevity and joy in eating."}, {"role": "user", "content": base_prompt + "\n" + core_prompt + optional_prompt}],
                     max_tokens=2500,
                     temperature=0.7
                 )
@@ -287,7 +293,7 @@ Be encouraging, practical, and anti-diet-culture. Focus on joy, flavor, and long
                 # Full plan for email
                 full_response = client.chat.completions.create(
                     model=MODEL_NAME,
-                    messages=[{"role": "system", "content": "You are Nora, warm nutrition coach."}, {"role": "user", "content": base_prompt + "\n" + full_plan_prompt}],
+                    messages=[{"role": "system", "content": "You are Nora, a warm, evidence-based nutrition coach focused on longevity and joy in eating."}, {"role": "user", "content": base_prompt + "\n" + full_plan_prompt}],
                     max_tokens=3500,
                     temperature=0.7
                 )
@@ -325,7 +331,7 @@ Be encouraging, practical, and anti-diet-culture. Focus on joy, flavor, and long
                     st.error("Email required!")
                 else:
                     plan_to_send = st.session_state.full_plan_for_email
-                    email_body = f"""Hi {name or 'there'},
+                    email_body = f"""Hi {st.session_state.user_name},
 
 Thank you for exploring nutrition with Nora at LBL Lifestyle Solutions!
 
@@ -341,7 +347,7 @@ Nora & the LBL Team"""
                         "from": "reports@lbllifestyle.com",
                         "to": [email],
                         "cc": [YOUR_EMAIL],
-                        "subject": f"{name or 'Client'}'s Complete LBL Nutrition Plan",
+                        "subject": f"{st.session_state.user_name or 'Client'}'s Complete LBL Nutrition Plan",
                         "text": email_body
                     }
                     headers = {"Authorization": f"Bearer {RESEND_API_KEY}", "Content-Type": "application/json"}
