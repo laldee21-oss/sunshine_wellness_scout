@@ -1,19 +1,21 @@
 import streamlit as st
-import requests
 from openai import OpenAI
 
+# Secrets
 XAI_API_KEY = st.secrets["XAI_API_KEY"]
-RESEND_API_KEY = st.secrets["RESEND_API_KEY"]
-YOUR_EMAIL = st.secrets["YOUR_EMAIL"]
-
 client = OpenAI(api_key=XAI_API_KEY, base_url="https://api.x.ai/v1")
 MODEL_NAME = "grok-4-1-fast-reasoning"
 
 def show():
+    # Initialize chat history
+    if "chat_history" not in st.session_state:
+        st.session_state.chat_history = {"nora": []}
+
+    # HIGH-CONTRAST PROFESSIONAL DESIGN
     st.markdown("""
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Inter:wght@400;500;600&display=swap');
-       
+        
         .stApp {
             background: linear-gradient(to bottom, #f5f7fa, #e0e7f0);
             color: #1e3a2f;
@@ -34,6 +36,10 @@ def show():
             border-radius: 10px !important;
             padding: 12px !important;
         }
+        .stTextInput > div > div > input:focus,
+        .stTextArea > div > div > textarea:focus {
+            border-color: #2d6a4f !important;
+        }
         div[data-baseweb="select"] > div {
             background-color: white !important;
             color: #1e3a2f !important;
@@ -42,6 +48,29 @@ def show():
             background-color: white !important;
             border: 2px solid #2d6a4f !important;
             border-radius: 20px !important;
+        }
+        .stChatInput > div > div > input {
+            color: #1e3a2f !important;
+        }
+        .stChatMessage {
+            background-color: transparent !important;
+        }
+        .optional-box {
+            background-color: #f0f7fc !important;
+            border: 2px solid #a0c4d8 !important;
+            border-left: 6px solid #2d6a4f !important;
+            border-radius: 12px;
+            padding: 18px;
+            margin-bottom: 25px;
+        }
+        label {
+            font-weight: 600 !important;
+            color: #2d6a4f !important;
+            font-size: 1.05rem !important;
+        }
+        .separator {
+            margin: 35px 0;
+            border-top: 1px solid #c0d8e0;
         }
         .stButton>button {
             background-color: #2d6a4f;
@@ -59,114 +88,231 @@ def show():
     </style>
     """, unsafe_allow_html=True)
 
-    st.markdown("<script>window.scrollTo(0, 0);</script>", unsafe_allow_html=True)
+    # Scroll to top
+    st.markdown("""
+    <script>
+        window.scrollTo(0, 0);
+        const mainSection = window.parent.document.querySelector('section.main');
+        if (mainSection) mainSection.scrollTop = 0;
+        setTimeout(() => { window.scrollTo(0, 0); if (mainSection) mainSection.scrollTop = 0; }, 100);
+    </script>
+    """, unsafe_allow_html=True)
 
+    # Back button
     if st.button("← Back to Team", key="nora_back_button"):
         st.session_state.current_page = "home"
         st.rerun()
 
-    st.image("https://i.postimg.cc/cJqPm9BP/pexels-tessy-agbonome-521343232-18252407.jpg", caption="Fuel Your Longevity")
+    # Hero image
+    st.image("https://i.postimg.cc/cJqPm9BP/pexels-tessy-agbonome-521343232-18252407.jpg", caption="Fuel Your Longevity – Welcome to your nutrition journey")
 
+    # Welcome & Disclaimer
     st.markdown("### 🥗 HI! I'M NORA – Your Nutrition Coach for Longevity")
-    st.success("**This tool is completely free – no cost, no obligation!**")
-    st.write("I help you build sustainable, delicious eating habits that fit your life — focusing on balance, joy, and long-term health.")
-    st.warning("**Important**: I am not a registered dietitian. This is general wellness education. Consult a professional for medical conditions.")
+    st.success("**This tool is completely free – no cost, no obligation! Your full plan will be emailed if requested.**")
+    st.write("I help you build sustainable, delicious eating habits that fit your life — focusing on balance, joy, and long-term health, tailored to your preferences.")
+    st.warning("**Important**: I am not a registered dietitian or medical professional. My suggestions are general wellness education based on publicly available research. Always consult a qualified healthcare provider or registered dietitian before making dietary changes, especially if you have medical conditions.")
 
+    # Name Input
+    st.markdown("### What's your name?")
+    st.write("So I can make this feel more personal 😊")
     user_name = st.text_input("Your first name (optional)", value=st.session_state.get("user_name", ""), key="nora_name_input")
     if user_name:
         st.session_state.user_name = user_name.strip()
     else:
         st.session_state.user_name = "there"
 
-    with st.expander("💡 Quick Start Ideas"):
+    # Quick Start Ideas
+    with st.expander("💡 Quick Start Ideas – Not sure where to begin?"):
         st.markdown("""
+        Here are popular ways users get started:
         - Create a 7-day plan with $100 grocery budget
         - Build meals around my 40/30/30 macros
         - Suggest snacks that won't spike blood sugar
         - Make family-friendly Mediterranean recipes
         """)
 
+    # Encouraging input
     st.markdown("### Tell Nora a little bit about you and your eating habits")
-    age = st.number_input("Your age", min_value=18, max_value=100, value=45, key="nora_age")
-    goals = st.multiselect("PRIMARY NUTRITION GOALS", ["Longevity/anti-aging", "Energy & vitality", "Heart health", "Weight management", "Gut health", "Brain health", "Muscle maintenance", "General wellness"], key="nora_goals")
+    st.write("**Be as detailed as possible!** The more you share about your age, goals, preferences, allergies, budget, and current diet, the better Nora can help. 😊")
+    st.caption("💡 Tip: Include favorite foods, foods to avoid, cooking time available, and health priorities!")
 
-    dietary_options = ["Mediterranean", "Plant-based", "Omnivore", "Pescatarian", "Keto", "Low-carb", "No restrictions"]
-    selected_dietary = st.multiselect("DIETARY PREFERENCES", dietary_options, default=["No restrictions"], key="nora_dietary")
+    age = st.number_input("Your age", min_value=18, max_value=100, value=45, step=1)
 
-    allergies = st.text_area("ALLERGIES OR INTOLERANCES? (optional)", key="nora_allergies")
-    budget_level = st.selectbox("WEEKLY GROCERY BUDGET LEVEL", ["Budget-conscious", "Moderate", "Premium/organic focus"], key="nora_budget")
-    cooking_time = st.selectbox("TIME AVAILABLE FOR COOKING", ["<20 min/meal", "20–40 min/meal", "40+ min/meal (love cooking)"], key="nora_cooking")
-    meals_per_day = st.slider("MEALS PER DAY YOU WANT PLANS FOR", 2, 5, 3, key="nora_meals")
-    macro_input = st.text_input("Optional: Daily Macro Targets (e.g., 40/30/30)", placeholder="Leave blank for balanced", key="nora_macros")
+    # Goals + Notes
+    goals = st.multiselect("PRIMARY NUTRITION GOALS", ["Longevity/anti-aging", "Energy & vitality", "Heart health", "Weight management", "Gut health", "Brain health", "Muscle maintenance", "General wellness"])
+    st.markdown('<div class="optional-box">', unsafe_allow_html=True)
+    goals_notes = st.text_area("Optional: Notes on your goals (e.g., specific preferences)", height=100)
+    st.markdown('</div>', unsafe_allow_html=True)
 
-    greg_plan_file = st.file_uploader("Optional: Upload Greg's workout plan", type=["txt", "pdf", "png", "jpg", "jpeg"], key="nora_greg_upload")
+    st.markdown('<div class="separator"></div>', unsafe_allow_html=True)
+
+    # Dietary preferences
+    dietary_options = [
+        ("Mediterranean", "Rich in fruits, veggies, olive oil, fish, nuts. Proven for heart health & longevity."),
+        ("Plant-based", "Mostly or fully plants — great for inflammation, fiber, environment."),
+        ("Omnivore", "Balanced everything-in-moderation approach — flexible and sustainable."),
+        ("Pescatarian", "Vegetarian + fish — excellent omega-3s for brain/heart."),
+        ("Keto", "Very low-carb, high-fat — can help weight loss & blood sugar."),
+        ("Low-carb", "Moderate carb reduction — good for energy stability."),
+        ("No restrictions", "Open to all foods — Nora will focus on balance and quality.")
+    ]
+
+    dietary_tooltips = {opt[0]: opt[1] for opt in dietary_options}
+    selected_dietary = st.multiselect(
+        "DIETARY PREFERENCES (hover for details)",
+        options=[opt[0] for opt in dietary_options],
+        default=["No restrictions"],
+        help="Hover over options for benefits & considerations"
+    )
+
+    if selected_dietary:
+        for diet in selected_dietary:
+            st.caption(f"**{diet}**: {dietary_tooltips[diet]}")
+
+    st.markdown('<div class="optional-box">', unsafe_allow_html=True)
+    dietary_notes = st.text_area("Optional: Notes on your dietary preferences (e.g., foods to include/avoid)", height=100)
+    st.markdown('</div>', unsafe_allow_html=True)
+
+    st.markdown('<div class="separator"></div>', unsafe_allow_html=True)
+
+    allergies = st.text_area("ALLERGIES OR INTOLERANCES? (optional)", placeholder="Example: Gluten intolerant, lactose sensitive, nut allergy")
+
+    st.markdown('<div class="separator"></div>', unsafe_allow_html=True)
+
+    budget_level = st.selectbox("WEEKLY GROCERY BUDGET LEVEL", ["Budget-conscious", "Moderate", "Premium/organic focus"])
+    st.markdown('<div class="optional-box">', unsafe_allow_html=True)
+    budget_notes = st.text_input("Optional: Specific budget amount or notes (e.g., $100/week max)")
+    st.markdown('</div>', unsafe_allow_html=True)
+
+    st.markdown('<div class="separator"></div>', unsafe_allow_html=True)
+
+    cooking_time = st.selectbox("TIME AVAILABLE FOR COOKING", ["<20 min/meal", "20–40 min/meal", "40+ min/meal (love cooking)"])
+    st.markdown('<div class="optional-box">', unsafe_allow_html=True)
+    cooking_notes = st.text_input("Optional: Specific cooking notes (e.g., prefer batch cooking on weekends)")
+    st.markdown('</div>', unsafe_allow_html=True)
+
+    st.markdown('<div class="separator"></div>', unsafe_allow_html=True)
+
+    meals_per_day = st.slider("MEALS PER DAY YOU WANT PLANS FOR", 2, 5, 3)
+
+    # Macro input
+    st.markdown('<div class="optional-box">', unsafe_allow_html=True)
+    macro_input = st.text_input("Optional: Daily Macro Targets (e.g., 40% carbs, 30% protein, 30% fat)", placeholder="Leave blank for balanced default")
+    st.markdown('</div>', unsafe_allow_html=True)
+
+    # Greg upload
+    st.markdown('<div class="optional-box">', unsafe_allow_html=True)
+    st.write("**Optional: Team Up with Greg!**")
+    st.write("If you've generated a workout plan with Greg, upload it here — Nora will coordinate nutrition to support your training.")
+    greg_plan_file = st.file_uploader("Upload Greg's plan (TXT, PDF, PNG, JPG)", type=["txt", "pdf", "png", "jpg", "jpeg"], key="greg_upload_nora")
+    st.markdown('</div>', unsafe_allow_html=True)
+
+    # Read uploaded Greg plan
     greg_plan_text = ""
     if greg_plan_file:
         try:
-            greg_plan_text = greg_plan_file.read().decode("utf-8")
+            if greg_plan_file.type == "text/plain":
+                greg_plan_text = greg_plan_file.read().decode("utf-8")
+            else:
+                greg_plan_text = "[Greg's workout plan uploaded — Nora will optimize nutrition accordingly]"
         except:
-            greg_plan_text = "[Greg's plan uploaded]"
+            greg_plan_text = "[Plan uploaded — content noted]"
 
-    plan_sections = st.multiselect("Add optional sections:", [
-        "Blue Zones Focus", "Supplement Education (general)", "Meal Prep Strategies",
-        "Eating Out Tips", "Hydration & Beverage Guide", "Seasonal/Longevity Food Focus",
-        "Family-Friendly Adaptations"
-    ], default=["Meal Prep Strategies"], key="nora_sections")
+    st.markdown("### Refine Your Meal Plan (Optional)")
+    st.write("Core plan always includes weekly meal ideas, grocery list, and longevity principles. Add extras:")
+    plan_sections = st.multiselect(
+        "Add optional sections:",
+        [
+            "Blue Zones Focus",
+            "Supplement Education (general)",
+            "Meal Prep Strategies",
+            "Eating Out Tips",
+            "Hydration & Beverage Guide",
+            "Seasonal/Longevity Food Focus",
+            "Family-Friendly Adaptations"
+        ],
+        default=["Meal Prep Strategies"]
+    )
 
-    if st.button("Generate My Custom Meal Plan", type="primary", key="nora_generate"):
-        with st.spinner("Nora is crafting your plan..."):
-            core_prompt = """
+    if st.button("Generate My Custom Meal Plan", type="primary"):
+        with st.spinner("Nora is crafting your personalized nutrition plan..."):
+            core_prompt = f"""
 ### Weekly Meal Plan
-7-day plan with specified meals/day. Include portion guidance and variety.
-### Grocery List
-Organized by category.
-### Longevity Nutrition Principles
-Key habits and why they matter.
-"""
-            optional_prompt = ""
-            if "Blue Zones Focus" in plan_sections: optional_prompt += "### Blue Zones Focus\nTips and recipes.\n\n"
-            if "Supplement Education (general)" in plan_sections: optional_prompt += "### Supplement Education (general)\nOverview — consult doctor.\n\n"
-            if "Meal Prep Strategies" in plan_sections: optional_prompt += "### Meal Prep Strategies\nTime-saving tips.\n\n"
-            if "Eating Out Tips" in plan_sections: optional_prompt += "### Eating Out Tips\nHealthy choices.\n\n"
-            if "Hydration & Beverage Guide" in plan_sections: optional_prompt += "### Hydration & Beverage Guide\nBest drinks.\n\n"
-            if "Seasonal/Longevity Food Focus" in plan_sections: optional_prompt += "### Seasonal/Longevity Food Focus\nCurrent best foods.\n\n"
-            if "Family-Friendly Adaptations" in plan_sections: optional_prompt += "### Family-Friendly Adaptations\nAdjustments for family.\n\n"
+7-day plan with {meals_per_day} meals/day.
+Focus on balanced, sustainable nutrition for long-term health and enjoyment.
+Include portion guidance and variety.
 
-            full_plan_prompt = core_prompt + optional_prompt + """
+### Grocery List
+Organized by category, estimated for 1 person.
+
+### Longevity Nutrition Principles
+Key habits this plan supports and why they matter.
+"""
+
+            optional_prompt = ""
+            if "Blue Zones Focus" in plan_sections:
+                optional_prompt += "### Blue Zones Focus\nTips and recipes from longevity hotspots.\n\n"
+            if "Supplement Education (general)" in plan_sections:
+                optional_prompt += "### Supplement Education (general)\nCommon longevity supplements and evidence overview — consult doctor.\n\n"
+            if "Meal Prep Strategies" in plan_sections:
+                optional_prompt += "### Meal Prep Strategies\nTime-saving tips for your cooking availability.\n\n"
+            if "Eating Out Tips" in plan_sections:
+                optional_prompt += "### Eating Out Tips\nHow to make healthy choices at restaurants.\n\n"
+            if "Hydration & Beverage Guide" in plan_sections:
+                optional_prompt += "### Hydration & Beverage Guide\nBest drinks for longevity (beyond water).\n\n"
+            if "Seasonal/Longevity Food Focus" in plan_sections:
+                optional_prompt += "### Seasonal/Longevity Food Focus\nCurrent season's best foods for health.\n\n"
+            if "Family-Friendly Adaptations" in plan_sections:
+                optional_prompt += "### Family-Friendly Adaptations\nHow to adjust for kids/partners.\n\n"
+
+            full_plan_prompt = core_prompt + """
 ### Blue Zones Focus
+Tips and recipes.
 ### Supplement Education (general)
+Overview.
 ### Meal Prep Strategies
+Tips.
 ### Eating Out Tips
+Choices.
 ### Hydration & Beverage Guide
+Drinks.
 ### Seasonal/Longevity Food Focus
+Best foods.
 ### Family-Friendly Adaptations
+Adjustments.
 """
 
             base_prompt = f"""
 User name: {st.session_state.user_name}
+Client profile:
 Age: {age}
 Goals: {', '.join(goals)}
-Dietary: {', '.join(selected_dietary)}
-Macros: {macro_input or 'Balanced'}
+Dietary preferences: {', '.join(selected_dietary) or 'Balanced omnivore'}
+Macro targets: {macro_input or 'Balanced default'}
 Allergies: {allergies or 'None'}
 Budget: {budget_level}
 Cooking time: {cooking_time}
-Greg's plan: {greg_plan_text or 'None'}
-You are Nora, warm, evidence-based nutrition coach. Focus on joy, flavor, and sustainability.
+Greg's plan: {greg_plan_text or 'None provided'}
+
+You are Nora, a warm, evidence-based nutrition coach focused on sustainable, enjoyable eating for long-term health.
+
+Be encouraging, practical, and anti-diet-culture. Focus on joy, flavor, and long-term health — adapt to user's stated preferences.
 """
 
             try:
+                # Display plan
                 display_response = client.chat.completions.create(
                     model=MODEL_NAME,
-                    messages=[{"role": "system", "content": "You are Nora, warm nutrition coach."}, {"role": "user", "content": base_prompt + core_prompt + optional_prompt}],
+                    messages=[{"role": "system", "content": "You are Nora, warm nutrition coach."}, {"role": "user", "content": base_prompt + "\n" + core_prompt + optional_prompt}],
                     max_tokens=2500,
                     temperature=0.7
                 )
                 display_plan = display_response.choices[0].message.content
 
+                # Full plan for email
                 full_response = client.chat.completions.create(
                     model=MODEL_NAME,
-                    messages=[{"role": "system", "content": "You are Nora, warm nutrition coach."}, {"role": "user", "content": base_prompt + full_plan_prompt}],
+                    messages=[{"role": "system", "content": "You are Nora, warm nutrition coach."}, {"role": "user", "content": base_prompt + "\n" + full_plan_prompt}],
                     max_tokens=3500,
                     temperature=0.7
                 )
@@ -174,17 +320,30 @@ You are Nora, warm, evidence-based nutrition coach. Focus on joy, flavor, and su
 
                 st.success("Nora's custom nutrition plan for you!")
                 st.markdown(display_plan)
-                st.session_state.full_plan_for_email = full_plan
-                st.info("📧 Want the complete version? Fill in email below!")
-            except Exception as e:
-                st.error("Nora is in the kitchen... try again.")
 
+                st.session_state.full_plan_for_email = full_plan
+
+                st.info("📧 Want the **complete version** with every section? Fill in the email form below!")
+
+                # Follow-up suggestions
+                st.markdown("### Would you like me to...")
+                st.markdown("""
+                - Adjust this plan for your allergies or budget?
+                - Coordinate with Greg for workout recovery meals?
+                - Add more recipes or meal prep ideas?
+                - Make this family-friendly?
+                """)
+            except Exception as e:
+                st.error("Nora is in the kitchen... try again soon.")
+                st.caption(f"Error: {str(e)}")
+
+    # Email form
     if "full_plan_for_email" in st.session_state:
-        st.markdown("### Get Your Full Plan Emailed")
+        st.markdown("### Get Your Full Plan Emailed (Save & Share)")
         with st.form("lead_form_nora", clear_on_submit=True):
-            name = st.text_input("Your Name", key="nora_email_name")
-            email = st.text_input("Email (required)", key="nora_email")
-            phone = st.text_input("Phone (optional)", key="nora_phone")
+            name = st.text_input("Your Name")
+            email = st.text_input("Email (required)", placeholder="you@example.com")
+            phone = st.text_input("Phone (optional)")
             submitted = st.form_submit_button("📧 Send My Full Plan")
             if submitted:
                 if not email:
@@ -192,48 +351,72 @@ You are Nora, warm, evidence-based nutrition coach. Focus on joy, flavor, and su
                 else:
                     plan_to_send = st.session_state.full_plan_for_email
                     email_body = f"""Hi {st.session_state.user_name},
-Thank you for exploring nutrition with Nora!
-Here's your COMPLETE longevity meal plan:
+
+Thank you for exploring nutrition with Nora at LBL Lifestyle Solutions!
+
+Here's your COMPLETE personalized longevity meal plan:
+
 {plan_to_send}
-Enjoy every bite!
+
+Enjoy every bite — you're fueling a longer, healthier life!
+
 Best,
 Nora & the LBL Team"""
-                    data = {"from": "reports@lbllifestyle.com", "to": [email], "cc": [YOUR_EMAIL], "subject": "Your LBL Nutrition Plan", "text": email_body}
+                    data = {
+                        "from": "reports@lbllifestyle.com",
+                        "to": [email],
+                        "cc": [YOUR_EMAIL],
+                        "subject": f"{st.session_state.user_name or 'Client'}'s Complete LBL Nutrition Plan",
+                        "text": email_body
+                    }
                     headers = {"Authorization": f"Bearer {RESEND_API_KEY}", "Content-Type": "application/json"}
                     try:
                         response = requests.post("https://api.resend.com/emails", json=data, headers=headers)
                         if response.status_code == 200:
-                            st.success(f"Sent to {email}!")
+                            st.success(f"Full plan sent to {email}! Check your inbox.")
                             st.balloons()
-                            del st.session_state.full_plan_for_email
+                            if "full_plan_for_email" in st.session_state:
+                                del st.session_state.full_plan_for_email
+                        else:
+                            st.error(f"Send failed: {response.text}")
                     except Exception as e:
-                        st.error("Send error.")
+                        st.error(f"Send error: {str(e)}")
 
-    st.markdown("### Have a follow-up question? Chat with Nora! 🥗")
-    for msg in st.session_state.chat_history.get("nora", []):
-        with st.chat_message(msg["role"]):
-            st.write(msg["content"])
+    # Streamlined chat
+    st.markdown("### Have a follow-up question? Chat with Nora in the box below! 🥗")
+    st.caption("Ask about recipes, substitutions, meal ideas — anything!")
 
-    if prompt := st.chat_input("Ask Nora...", key="nora_chat_input"):
-        st.session_state.chat_history.setdefault("nora", []).append({"role": "user", "content": prompt})
-        with st.chat_message("user"):
-            st.write(prompt)
+    for msg in st.session_state.chat_history["nora"]:
+        if msg["role"] == "user":
+            st.chat_message("user").write(msg["content"])
+        else:
+            st.chat_message("assistant").write(msg["content"])
+
+    if prompt := st.chat_input("Ask Nora a question..."):
+        st.session_state.chat_history["nora"].append({"role": "user", "content": prompt})
+        st.chat_message("user").write(prompt)
+
         with st.spinner("Nora is thinking..."):
             try:
                 response = client.chat.completions.create(
                     model=MODEL_NAME,
-                    messages=[{"role": "system", "content": "You are Nora, warm nutrition coach."}] + st.session_state.chat_history["nora"],
+                    messages=[
+                        {"role": "system", "content": "You are Nora, a warm, evidence-based nutrition coach focused on longevity and joy in eating."},
+                        *st.session_state.chat_history["nora"]
+                    ],
                     max_tokens=800,
                     temperature=0.7
                 )
                 reply = response.choices[0].message.content
                 st.session_state.chat_history["nora"].append({"role": "assistant", "content": reply})
-                with st.chat_message("assistant"):
-                    st.write(reply)
+                st.chat_message("assistant").write(reply)
             except Exception as e:
-                st.error("Connection issue.")
+                st.error("Sorry, I'm having trouble right now. Try again soon.")
 
+        st.rerun()
+
+    # Footer
     st.markdown("---")
-    st.markdown("<small>LBL Lifestyle Solutions • Powered by Grok (xAI)</small>", unsafe_allow_html=True)
+    st.markdown("<small>LBL Lifestyle Solutions • Your Holistic Longevity Blueprint<br>Powered by Grok (xAI) • Personalized wellness powered by AI</small>", unsafe_allow_html=True)
 
 show()
