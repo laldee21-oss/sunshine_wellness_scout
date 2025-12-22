@@ -1,10 +1,14 @@
 import streamlit as st
 
+# ===================================================
+# FORCE HOME ON FRESH LOAD OR INVALID PAGE
+# ===================================================
+
 if st.query_params.get("page") is None:
     if "current_page" not in st.session_state or st.session_state.current_page != "home":
         st.session_state.current_page = "home"
         st.rerun()
-        
+
 # ===================================================
 # SESSION STATE INITIALIZATION
 # ===================================================
@@ -32,6 +36,8 @@ def navigate_to(page: str):
 # ===================================================
 
 if st.session_state.current_page == "home":
+    st.set_page_config(page_title="LBL Lifestyle Solutions – Live Better Longer", page_icon="❤️")
+
     st.markdown("""
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Inter:wght@400;500;600&display=swap');
@@ -100,20 +106,6 @@ if st.session_state.current_page == "home":
             margin: 1rem 0;
             font-style: italic;
         }
-        .stButton>button {
-            background-color: #2d6a4f;
-            color: white;
-            border-radius: 12px;
-            font-weight: 600;
-            font-size: 1.1rem;
-            height: 3.5em;
-            width: 100%;
-            border: none;
-            box-shadow: 0 4px 8px rgba(45, 106, 79, 0.2);
-        }
-        .stButton>button:hover {
-            background-color: #40916c;
-        }
         img {
             border-radius: 16px;
             box-shadow: 0 8px 20px rgba(0,0,0,0.1);
@@ -141,15 +133,18 @@ if st.session_state.current_page == "home":
 
     # VIDEO EMBED
     st.markdown("""
-    <div style="display: flex; justify-content: center; margin: 40px 0;">
-        <iframe width="800" height="450" src="https://www.youtube.com/embed/Fxl0KSgsBck?autoplay=1&mute=1&loop=1&playlist=Fxl0KSgsBck" 
-                title="LBL Lifestyle Solutions – Meet Your AI Longevity Team" frameborder="0" 
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                allowfullscreen></iframe>
+    <div style="display: flex; justify-content: center; margin: 40px 0; border-radius: 16px; overflow: hidden; box-shadow: 0 8px 20px rgba(0,0,0,0.1);">
+        <iframe width="800" height="450"
+                src="https://player.vimeo.com/video/1148502814?autoplay=1&muted=1&background=1&title=0&byline=0&portrait=0"
+                title="LBL Lifestyle Solutions – Your Longevity Team"
+                frameborder="0"
+                allow="autoplay; fullscreen"
+                allowfullscreen>
+        </iframe>
     </div>
     """, unsafe_allow_html=True)
 
-    # VERSION 1 OPENING STATEMENT
+    # OPENING STATEMENT
     st.markdown("""
     <div class='opening-statement'>
     The future is now — and it's personal.<br><br>
@@ -175,8 +170,10 @@ if st.session_state.current_page == "home":
 
     # TOP NAVIGATION TABS
     st.markdown("### Meet the Agents")
-    tab_fred, tab_greg, tab_zoey, tab_nora = st.tabs(["Fred", "Greg", "Nurse Zoey Zoe", "Nora"])
+    tab_home, tab_fred, tab_greg, tab_zoey, tab_nora = st.tabs(["Home", "Fred", "Greg", "Nurse Zoey Zoe", "Nora"])
 
+    with tab_home:
+        st.info("You're already on the home page! Scroll up to explore.")
     with tab_fred:
         navigate_to("fred")
     with tab_greg:
@@ -186,9 +183,9 @@ if st.session_state.current_page == "home":
     with tab_nora:
         navigate_to("nora")
 
-    # Agent cards (no buttons — for info only)
-    st.markdown("### Learn about your agents:")
-    st.markdown("<p style='text-align:center; color:#1e3a2f; font-size:1.2rem;'>Use the tabs above to meet and chat with your agents!</p>", unsafe_allow_html=True)
+    # AGENT CARDS — for explanation only (no buttons)
+    st.markdown("### Meet your longevity team")
+    st.markdown("<p style='text-align:center; color:#1e3a2f; font-size:1.2rem;'>Use the tabs above to chat with any agent</p>", unsafe_allow_html=True)
 
     cols = st.columns(4)
 
@@ -242,4 +239,3 @@ elif st.session_state.current_page == "zoey":
 elif st.session_state.current_page == "nora":
     import pages.nora as nora_page
     nora_page.show()
-
