@@ -420,12 +420,3 @@ Nora & the LBL Team"""
     st.markdown("<small>LBL Lifestyle Solutions • Your Holistic Longevity Blueprint<br>Powered by Grok (xAI) • Personalized wellness powered by AI</small>", unsafe_allow_html=True)
 
 show()
-VIMO VID VER 1>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-# Version 1: Muted, play once, standard spacing (safest for mobile)
-st.markdown("""
-<div style="display: flex; justify-content: center; margin: 40px 0; border-radius: 16px; overflow: hidden; box-shadow: 0 8px 20px rgba(0,0,0,0.1);">
-    <iframe src="https://player.vimeo.com/video/1148502814?autoplay=1&muted=1&background=1&title=0&byline=0&portrait=0" 
-            width="800" height="450" frameborder="0" allow="autoplay; fullscreen" allowfullscreen>
-    </iframe>
-</div>
-""", unsafe_allow_html=True)
