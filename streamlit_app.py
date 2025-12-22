@@ -1,10 +1,14 @@
 import streamlit as st
 
+# ===================================================
+# FORCE HOME ON FRESH LOAD OR INVALID PAGE
+# ===================================================
+
 if "current_page" not in st.session_state or st.session_state.current_page not in ["home", "fred", "greg", "zoey", "nora"]:
     st.session_state.current_page = "home"
 
 # ===================================================
-# SESSION STATE INITIALIZATION
+# CHAT HISTORY INITIALIZATION
 # ===================================================
 
 if "chat_history" not in st.session_state:
@@ -14,12 +18,6 @@ if "chat_history" not in st.session_state:
         "zoey": [],
         "nora": []
     }
-
-if "current_page" not in st.session_state:
-    st.session_state.current_page = "home"
-
-if st.session_state.current_page not in ["home", "fred", "greg", "zoey", "nora"]:
-    st.session_state.current_page = "home"
 
 def navigate_to(page: str):
     st.session_state.current_page = page
@@ -139,7 +137,7 @@ if st.session_state.current_page == "home":
     st.markdown("<h1 class='main-header'>LBL LIFESTYLE SOLUTIONS</h1>", unsafe_allow_html=True)
     st.markdown("<p class='tagline'>LIVE BETTER LONGER</p>", unsafe_allow_html=True)
 
-    # VIDEO EMBED
+    # VIDEO EMBED — current version (clean, looping, muted)
     st.markdown("""
     <div style="display: flex; justify-content: center; margin: 40px 0; border-radius: 16px; overflow: hidden; box-shadow: 0 8px 20px rgba(0,0,0,0.1);">
         <iframe width="800" height="450"
@@ -176,7 +174,7 @@ if st.session_state.current_page == "home":
     </div>
     """, unsafe_allow_html=True)
 
-    # TOP NAVIGATION TABS
+    # TOP NAVIGATION TABS — "Meet the Agents"
     st.markdown("### Meet the Agents")
     tab_fred, tab_greg, tab_zoey, tab_nora = st.tabs(["Fred", "Greg", "Nurse Zoey Zoe", "Nora"])
 
@@ -253,4 +251,3 @@ elif st.session_state.current_page == "zoey":
 elif st.session_state.current_page == "nora":
     import pages.nora as nora_page
     nora_page.show()
-
