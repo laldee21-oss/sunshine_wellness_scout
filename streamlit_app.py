@@ -18,10 +18,6 @@ if "current_page" not in st.session_state:
 if st.session_state.current_page not in ["home", "fred", "greg", "zoey", "nora"]:
     st.session_state.current_page = "home"
 
-# ===================================================
-# NAVIGATION FUNCTION
-# ===================================================
-
 def navigate_to(page: str):
     st.session_state.current_page = page
     st.rerun()
@@ -31,6 +27,8 @@ def navigate_to(page: str):
 # ===================================================
 
 if st.session_state.current_page == "home":
+    st.set_page_config(page_title="LBL Lifestyle Solutions – Live Better Longer", page_icon="❤️")
+
     st.markdown("""
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Inter:wght@400;500;600&display=swap');
@@ -175,7 +173,7 @@ if st.session_state.current_page == "home":
     </div>
     """, unsafe_allow_html=True)
 
-    # TOP NAVIGATION TABS — "Meet the Agents" (main navigation)
+    # TOP NAVIGATION TABS
     st.markdown("### Meet the Agents")
     tab_fred, tab_greg, tab_zoey, tab_nora = st.tabs(["Fred", "Greg", "Nurse Zoey Zoe", "Nora"])
 
@@ -188,7 +186,7 @@ if st.session_state.current_page == "home":
     with tab_nora:
         navigate_to("nora")
 
-    # Agent cards — now just trigger the corresponding tab
+    # Agent cards
     st.markdown("### Or choose below:")
     st.markdown("<p style='text-align:center; color:#1e3a2f; font-size:1.2rem;'>Click an agent to begin your longevity journey</p>", unsafe_allow_html=True)
 
@@ -234,7 +232,7 @@ if st.session_state.current_page == "home":
     st.markdown("<small>LBL Lifestyle Solutions • Your Holistic Longevity Blueprint<br>Powered by Grok (xAI) • Personalized wellness powered by AI</small>", unsafe_allow_html=True)
 
 # ===================================================
-# AGENT PAGES — Remove back buttons (use top tabs only)
+# AGENT PAGES
 # ===================================================
 
 elif st.session_state.current_page == "fred":
