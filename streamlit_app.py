@@ -174,7 +174,7 @@ if st.session_state.current_page == "home":
         st.markdown("<div class='agent-examples'>Examples:<br>• Build a 3-day home workout for busy parents<br>• Create a plan for beginners with bad knees<br>• Add mobility work to my current routine<br>• Design a program for better sleep and energy</div>", unsafe_allow_html=True)
 
     with cols[2]:
-        st.markdown("<div class='agent-name'>NURSE ZOEY ZOE</div>", unsafe_allow_html=True)
+        st.markdown("<div class='agent-name'>ZOEY</div>", unsafe_allow_html=True)
         st.image("https://images.pexels.com/photos/5215021/pexels-photo-5215021.jpeg", width=200)
         st.markdown("<div class='agent-subtitle'>YOUR HEALTH ASSESSOR</div>", unsafe_allow_html=True)
         st.markdown("<div class='agent-desc'>A compassionate guide helping you understand labs, symptoms, and preventive wellness habits.</div>", unsafe_allow_html=True)
@@ -209,3 +209,4 @@ elif st.session_state.current_page == "zoey":
 elif st.session_state.current_page == "nora":
     import pages.nora as nora_page
     nora_page.show()
+
