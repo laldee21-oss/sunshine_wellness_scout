@@ -285,7 +285,7 @@ Greg & the LBL Team"""
                     data = {
                         "from": "reports@lbllifestyle.com",
                         "to": [email],
-                        "cc": [YOUR_EMAIL],
+                        "cc": [st.secrets["YOUR_EMAIL"]],
                         "subject": f"{st.session_state.user_name or 'Client'}'s Complete LBL Fitness Plan",
                         "text": email_body
                     }
