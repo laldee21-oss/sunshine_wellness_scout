@@ -1,5 +1,10 @@
 import streamlit as st
 
+if st.query_params.get("page") is None:
+    if "current_page" not in st.session_state or st.session_state.current_page != "home":
+        st.session_state.current_page = "home"
+        st.rerun()
+        
 # ===================================================
 # SESSION STATE INITIALIZATION
 # ===================================================
@@ -237,3 +242,4 @@ elif st.session_state.current_page == "zoey":
 elif st.session_state.current_page == "nora":
     import pages.nora as nora_page
     nora_page.show()
+
