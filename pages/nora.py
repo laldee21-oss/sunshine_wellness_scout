@@ -96,7 +96,7 @@ def show():
     """, unsafe_allow_html=True)
 
     # Back button
-    if st.button("← Back to Team", key="nora_back_button"):
+    if st.button("← Back to Home (Nora)", key="nora_back_button"):
         st.session_state.current_page = "home"
         st.rerun()
 
