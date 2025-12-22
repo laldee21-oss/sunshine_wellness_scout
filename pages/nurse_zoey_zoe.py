@@ -110,7 +110,7 @@ def show():
     # Name Input
     st.markdown("### What's your name?")
     st.write("So I can make this feel more personal 😊")
-    user_name = st.text_input("Your first name (optional – Zoey)", value=st.session_state.get("user_name", ""), key="zoey_name_input")
+    user_name = st.text_input("Your first name (optional)", value=st.session_state.get("user_name", ""), key="zoey_name_input_unique_v2")
     if user_name:
         st.session_state.user_name = user_name.strip()
     else:
@@ -126,7 +126,7 @@ def show():
         - Suggest preventive screenings for my age
         """)
 
-    # Input form
+    # Encouraging input
     st.markdown("### Tell Zoey about your health questions or data")
     st.write("**Be as detailed as possible!** Share symptoms, labs, lifestyle, concerns, or goals — the more context, the better the educational insights.")
     st.caption("💡 Tip: Include age, symptoms duration, current habits, family history, or specific questions!")
