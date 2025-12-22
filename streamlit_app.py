@@ -1,14 +1,7 @@
 import streamlit as st
 
 # ===================================================
-# FORCE HOME ON FRESH LOAD OR INVALID PAGE
-# ===================================================
-
-if "current_page" not in st.session_state or st.session_state.current_page not in ["home", "fred", "greg", "zoey", "nora"]:
-    st.session_state.current_page = "home"
-
-# ===================================================
-# CHAT HISTORY INITIALIZATION
+# SESSION STATE INITIALIZATION
 # ===================================================
 
 if "chat_history" not in st.session_state:
@@ -19,6 +12,12 @@ if "chat_history" not in st.session_state:
         "nora": []
     }
 
+if "current_page" not in st.session_state:
+    st.session_state.current_page = "home"
+
+if st.session_state.current_page not in ["home", "fred", "greg", "zoey", "nora"]:
+    st.session_state.current_page = "home"
+
 def navigate_to(page: str):
     st.session_state.current_page = page
     st.rerun()
@@ -28,8 +27,6 @@ def navigate_to(page: str):
 # ===================================================
 
 if st.session_state.current_page == "home":
-    st.set_page_config(page_title="Home Page – LBL Lifestyle Solutions", page_icon="❤️")
-
     st.markdown("""
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Inter:wght@400;500;600&display=swap');
@@ -116,41 +113,23 @@ if st.session_state.current_page == "home":
             border-radius: 16px;
             box-shadow: 0 8px 20px rgba(0,0,0,0.1);
         }
-        /* Top tabs styling */
-        .stTabs [data-baseweb="tab-list"] {
-            gap: 20px;
-            justify-content: center;
-            margin: 20px 0;
-        }
-        .stTabs [data-baseweb="tab"] {
-            font-size: 1.2rem;
-            font-weight: 600;
-            color: #2d6a4f;
-        }
-        .stTabs [data-baseweb="tab"][aria-selected="true"] {
-            color: #40916c;
-            border-bottom: 3px solid #40916c;
-        }
     </style>
     """, unsafe_allow_html=True)
 
     st.markdown("<h1 class='main-header'>LBL LIFESTYLE SOLUTIONS</h1>", unsafe_allow_html=True)
     st.markdown("<p class='tagline'>LIVE BETTER LONGER</p>", unsafe_allow_html=True)
 
-    # VIDEO EMBED — clean, looping, muted autoplay, no distractions
+    # VIDEO EMBED
     st.markdown("""
-    <div style="display: flex; justify-content: center; margin: 40px 0; border-radius: 16px; overflow: hidden; box-shadow: 0 8px 20px rgba(0,0,0,0.1);">
-        <iframe width="800" height="450"
-                src="https://www.youtube.com/embed/IhiRZbkENGo?autoplay=1&mute=1&loop=1&playlist=IhiRZbkENGo&controls=0&rel=0&modestbranding=1"
-                title="LBL Lifestyle Solutions – Your Longevity Team"
-                frameborder="0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowfullscreen>
-        </iframe>
+    <div style="display: flex; justify-content: center; margin: 40px 0;">
+        <iframe width="800" height="450" src="https://www.youtube.com/embed/Fxl0KSgsBck?autoplay=1&mute=1&loop=1&playlist=Fxl0KSgsBck" 
+                title="LBL Lifestyle Solutions – Meet Your AI Longevity Team" frameborder="0" 
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                allowfullscreen></iframe>
     </div>
     """, unsafe_allow_html=True)
 
-    # OPENING STATEMENT
+    # VERSION 1 OPENING STATEMENT
     st.markdown("""
     <div class='opening-statement'>
     The future is now — and it's personal.<br><br>
@@ -174,21 +153,7 @@ if st.session_state.current_page == "home":
     </div>
     """, unsafe_allow_html=True)
 
-    # TOP NAVIGATION TABS — "Meet the Agents"
-    st.markdown("### Meet the Agents")
-    tab_fred, tab_greg, tab_zoey, tab_nora = st.tabs(["Fred", "Greg", "Nurse Zoey Zoe", "Nora"])
-
-    with tab_fred:
-        navigate_to("fred")
-    with tab_greg:
-        navigate_to("greg")
-    with tab_zoey:
-        navigate_to("zoey")
-    with tab_nora:
-        navigate_to("nora")
-
-    # Agent cards
-    st.markdown("### Or choose below:")
+    st.markdown("### MEET THE LIFESTYLE TEAM")
     st.markdown("<p style='text-align:center; color:#1e3a2f; font-size:1.2rem;'>Click an agent to begin your longevity journey</p>", unsafe_allow_html=True)
 
     cols = st.columns(4)
