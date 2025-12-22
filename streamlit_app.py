@@ -3,7 +3,6 @@ import streamlit as st
 # ===================================================
 # SESSION STATE INITIALIZATION
 # ===================================================
-
 if "chat_history" not in st.session_state:
     st.session_state.chat_history = {
         "fred": [],
@@ -11,10 +10,8 @@ if "chat_history" not in st.session_state:
         "zoey": [],
         "nora": []
     }
-
 if "current_page" not in st.session_state:
     st.session_state.current_page = "home"
-
 if st.session_state.current_page not in ["home", "fred", "greg", "zoey", "nora"]:
     st.session_state.current_page = "home"
 
@@ -25,12 +22,11 @@ def navigate_to(page: str):
 # ===================================================
 # HOME PAGE
 # ===================================================
-
 if st.session_state.current_page == "home":
     st.markdown("""
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Inter:wght@400;500;600&display=swap');
-        
+       
         .stApp {
             background: linear-gradient(to bottom, #f5f7fa, #e0e7f0);
             color: #1e3a2f;
@@ -119,17 +115,14 @@ if st.session_state.current_page == "home":
     st.markdown("<h1 class='main-header'>LBL LIFESTYLE SOLUTIONS</h1>", unsafe_allow_html=True)
     st.markdown("<p class='tagline'>LIVE BETTER LONGER</p>", unsafe_allow_html=True)
 
-    # Version 1: Muted, play once, standard spacing (safest for mobile)
     st.markdown("""
     <div style="display: flex; justify-content: center; margin: 40px 0; border-radius: 16px; overflow: hidden; box-shadow: 0 8px 20px rgba(0,0,0,0.1);">
-        <iframe src="https://player.vimeo.com/video/1148502814?autoplay=1&muted=1&background=1&title=0&byline=0&portrait=0" 
+        <iframe src="https://player.vimeo.com/video/1148502814?autoplay=1&muted=1&background=1&title=0&byline=0&portrait=0"
                 width="800" height="450" frameborder="0" allow="autoplay; fullscreen" allowfullscreen>
-    </iframe>
+        </iframe>
     </div>
     """, unsafe_allow_html=True)
 
-   
-    # VERSION 1 OPENING STATEMENT
     st.markdown("""
     <div class='opening-statement'>
     The future is now — and it's personal.<br><br>
@@ -157,7 +150,6 @@ if st.session_state.current_page == "home":
     st.markdown("<p style='text-align:center; color:#1e3a2f; font-size:1.2rem;'>Click an agent to begin your longevity journey</p>", unsafe_allow_html=True)
 
     cols = st.columns(4)
-
     with cols[0]:
         st.markdown("<div class='agent-name'>FRED</div>", unsafe_allow_html=True)
         st.image("https://i.postimg.cc/MGxQfXtd/austin-distel-h1RW-NFt-Uyc-unsplash.jpg", width=200)
@@ -200,7 +192,6 @@ if st.session_state.current_page == "home":
 # ===================================================
 # AGENT PAGES
 # ===================================================
-
 elif st.session_state.current_page == "fred":
     import pages.fred as fred_page
     fred_page.show()
@@ -216,4 +207,3 @@ elif st.session_state.current_page == "zoey":
 elif st.session_state.current_page == "nora":
     import pages.nora as nora_page
     nora_page.show()
-
