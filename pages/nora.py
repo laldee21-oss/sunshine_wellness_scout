@@ -95,11 +95,6 @@ def show():
     </script>
     """, unsafe_allow_html=True)
 
-    # Back button
-    if st.button("← Back to Home (Nora)", key="nora_back_button"):
-        st.session_state.current_page = "home"
-        st.rerun()
-
     # Hero image
     st.image("https://i.postimg.cc/cJqPm9BP/pexels-tessy-agbonome-521343232-18252407.jpg", caption="Fuel Your Longevity – Welcome to your nutrition journey")
 
