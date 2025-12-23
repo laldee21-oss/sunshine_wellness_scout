@@ -1,5 +1,4 @@
 import streamlit as st
-import requests
 from openai import OpenAI
 
 # Secrets
@@ -122,12 +121,14 @@ def show():
     st.warning("**Important**: I am not a certified personal trainer or medical professional. My suggestions are general wellness education. Always consult a qualified trainer or doctor before starting a new exercise program, especially if you have injuries or conditions.")
     st.success("**This tool is completely free – no cost, no obligation! Your full plan will be emailed if requested.**")
 
-    # Name Input
+    # Name Input — blank by default, safe fallback
     st.markdown("### What's your name?")
     st.write("So I can make this feel more personal 😊")
     user_name = st.text_input("Your first name (optional)", value=st.session_state.get("user_name", ""), key="greg_name_input_unique")
     if user_name.strip():
         st.session_state.user_name = user_name.strip()
+    else:
+        st.session_state.user_name = st.session_state.get("user_name", "")
 
     # Quick Start Ideas
     with st.expander("💡 Quick Start Ideas – Not sure where to begin?"):
