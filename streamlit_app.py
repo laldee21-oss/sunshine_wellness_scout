@@ -15,10 +15,10 @@ if st.query_params.get("page") is None:
 
 if "chat_history" not in st.session_state:
     st.session_state.chat_history = {
-        "fred": [],
-        "greg": [],
-        "zoey": [],
-        "nora": []
+        "FRED'S OFFICE": [],
+        "GREG'S GYM": [],
+        "ZOEY'S CLINIC": [],
+        "NORA'S KITCHEN": []
     }
 
 if "current_page" not in st.session_state:
@@ -214,3 +214,4 @@ elif st.session_state.current_page == "zoey":
 elif st.session_state.current_page == "nora":
     import pages.nora as nora_page
     nora_page.show()
+
