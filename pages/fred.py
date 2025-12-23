@@ -145,10 +145,13 @@ def show():
     </style>
     """, unsafe_allow_html=True)
 
-    # Force scroll to top
+    # Force scroll to top — reliable version
     st.markdown("""
     <script>
-        window.parent.document.querySelector('section.main').scrollTop = 0;
+        window.scrollTo(0, 0);
+        if (parent.document.querySelector('section.main')) {
+            parent.document.querySelector('section.main').scrollTop = 0;
+        }
     </script>
     """, unsafe_allow_html=True)
 
