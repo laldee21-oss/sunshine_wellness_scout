@@ -73,15 +73,21 @@ def add_images_to_report(report_text, location_hint="", client_needs=""):
     return '\n'.join(enhanced_lines)
 
 def show():
-    # Initialize chat history
-    if "chat_history" not in st.session_state:
-        st.session_state.chat_history = {"fred": []}
+    # Set page title
+    st.set_page_config(page_title="Fred – Your Wellness Home Scout | LBL Lifestyle Solutions", page_icon="🏡")
 
-    # HIGH-CONTRAST DESIGN
+    # Safe chat history initialization for this agent
+    agent_key = "fred"
+    if "chat_history" not in st.session_state:
+        st.session_state.chat_history = {}
+    if agent_key not in st.session_state.chat_history:
+        st.session_state.chat_history[agent_key] = []
+
+    # HIGH-CONTRAST PROFESSIONAL DESIGN
     st.markdown("""
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Inter:wght@400;500;600&display=swap');
-       
+        
         .stApp {
             background: linear-gradient(to bottom, #f5f7fa, #e0e7f0);
             color: #1e3a2f;
@@ -92,33 +98,19 @@ def show():
             color: #2d6a4f;
             font-weight: 600;
         }
-        /* Force consistent input styling */
         .stTextInput > div > div > input,
         .stTextArea > div > div > textarea,
-        .stSelectbox > div > div > div[data-baseweb="select"] > div,
-        .stNumberInput > div > div > input {
-            background-color: white !important;
-            color: #1e3a2f !important;
+        .stSelectbox > div > div,
+        .stSlider > div > div > div {
             border: 2px solid #a0c4d8 !important;
             border-radius: 10px !important;
             padding: 12px !important;
-        }
-        /* Dropdown selected item visible */
-        div[data-baseweb="select"] > div {
             background-color: white !important;
-            color: #1e3a2f !important;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05) !important;
         }
-        /* Chat input visible */
-        .stChatInput > div {
-            background-color: white !important;
-            border: 2px solid #2d6a4f !important;
-        }
-        .stChatInput > div > div > input {
-            color: #1e3a2f !important;
-        }
-        /* No overlay on chat messages */
-        .stChatMessage {
-            background-color: transparent !important;
+        .stTextInput > div > div > input:focus,
+        .stTextArea > div > div > textarea:focus {
+            border-color: #2d6a4f !important;
         }
         .optional-box {
             background-color: #f0f7fc !important;
@@ -153,13 +145,10 @@ def show():
     </style>
     """, unsafe_allow_html=True)
 
-    # Scroll to top
+    # Force scroll to top
     st.markdown("""
     <script>
-        window.scrollTo(0, 0);
-        const mainSection = window.parent.document.querySelector('section.main');
-        if (mainSection) mainSection.scrollTop = 0;
-        setTimeout(() => { window.scrollTo(0, 0); if (mainSection) mainSection.scrollTop = 0; }, 100);
+        window.parent.document.querySelector('section.main').scrollTop = 0;
     </script>
     """, unsafe_allow_html=True)
 
@@ -175,7 +164,7 @@ def show():
     # Name Input
     st.markdown("### What's your name?")
     st.write("So I can make this feel more personal 😊")
-    user_name = st.text_input("Your first name (optional)", value=st.session_state.get("user_name", ""), key="fred_name_input")
+    user_name = st.text_input("Your first name (optional)", value=st.session_state.get("user_name", ""), key="fred_name_input_unique")
     if user_name:
         st.session_state.user_name = user_name.strip()
     else:
@@ -341,20 +330,24 @@ Use warm, encouraging, insightful language.
                     - Suggest home modifications for better wellness?
                     - Coordinate with Greg for a home gym setup?
                     """)
+                except Exception as e:
+                    st.error("Fred is reviewing listings... try again soon.")
+                    st.caption(f"Error: {str(e)}")
 
-                    # EMAIL FORM — ADDED HERE
-                    st.markdown("### Get Your Full Report Emailed (Save & Share)")
-                    with st.form("lead_form_fred", clear_on_submit=True):
-                        name = st.text_input("Your Name")
-                        email = st.text_input("Email (required)", placeholder="you@example.com")
-                        phone = st.text_input("Phone (optional)")
-                        submitted = st.form_submit_button("📧 Send My Full Report")
-                        if submitted:
-                            if not email:
-                                st.error("Email required!")
-                            else:
-                                report_to_send = st.session_state.full_report_for_email
-                                email_body = f"""Hi {st.session_state.user_name},
+    # Email form
+    if "full_report_for_email" in st.session_state:
+        st.markdown("### Get Your Full Report Emailed (Save & Share)")
+        with st.form("lead_form_fred", clear_on_submit=True):
+            name = st.text_input("Your Name")
+            email = st.text_input("Email (required)", placeholder="you@example.com")
+            phone = st.text_input("Phone (optional)")
+            submitted = st.form_submit_button("📧 Send My Full Report")
+            if submitted:
+                if not email:
+                    st.error("Email required!")
+                else:
+                    report_to_send = st.session_state.full_report_for_email
+                    email_body = f"""Hi {st.session_state.user_name},
 
 Thank you for exploring LBL Lifestyle Solutions – Your Holistic Longevity Blueprint.
 
@@ -366,45 +359,41 @@ Reply anytime to discuss how we can build your complete longevity plan.
 
 Best regards,
 Fred & the LBL Team"""
-                                data = {
-                                    "from": "reports@lbllifestyle.com",
-                                    "to": [email],
-                                    "cc": [YOUR_EMAIL],
-                                    "subject": f"{st.session_state.user_name or 'Client'}'s Complete LBL Wellness Home Report",
-                                    "text": email_body
-                                }
-                                headers = {
-                                    "Authorization": f"Bearer {RESEND_API_KEY}",
-                                    "Content-Type": "application/json"
-                                }
-                                try:
-                                    response = requests.post("https://api.resend.com/emails", json=data, headers=headers)
-                                    if response.status_code == 200:
-                                        st.success(f"Complete report sent to {email}! Check your inbox.")
-                                        st.balloons()
-                                        if "full_report_for_email" in st.session_state:
-                                            del st.session_state.full_report_for_email
-                                    else:
-                                        st.error(f"Send failed: {response.text}")
-                                except Exception as e:
-                                    st.error(f"Send error: {str(e)}")
-
-                except Exception as e:
-                    st.error("Fred is reviewing listings... try again soon.")
-                    st.caption(f"Error: {str(e)}")
+                    data = {
+                        "from": "reports@lbllifestyle.com",
+                        "to": [email],
+                        "cc": [st.secrets["YOUR_EMAIL"]],
+                        "subject": f"{st.session_state.user_name or 'Client'}'s Complete LBL Wellness Home Report",
+                        "text": email_body
+                    }
+                    headers = {
+                        "Authorization": f"Bearer {st.secrets['RESEND_API_KEY']}",
+                        "Content-Type": "application/json"
+                    }
+                    try:
+                        response = requests.post("https://api.resend.com/emails", json=data, headers=headers)
+                        if response.status_code == 200:
+                            st.success(f"Complete report sent to {email}! Check your inbox.")
+                            st.balloons()
+                            if "full_report_for_email" in st.session_state:
+                                del st.session_state.full_report_for_email
+                        else:
+                            st.error(f"Send failed: {response.text}")
+                    except Exception as e:
+                        st.error(f"Send error: {str(e)}")
 
     # Streamlined chat
-    st.markdown("### Have a follow-up question? Chat with Fred below!")
+    st.markdown("### Have a follow-up question? Chat with Fred in the box below! 🏡")
     st.caption("Ask about neighborhoods, features, or anything else!")
 
-    for msg in st.session_state.chat_history["fred"]:
+    for msg in st.session_state.chat_history[agent_key]:
         if msg["role"] == "user":
             st.chat_message("user").write(msg["content"])
         else:
             st.chat_message("assistant").write(msg["content"])
 
     if prompt := st.chat_input("Ask Fred a question..."):
-        st.session_state.chat_history["fred"].append({"role": "user", "content": prompt})
+        st.session_state.chat_history[agent_key].append({"role": "user", "content": prompt})
         st.chat_message("user").write(prompt)
 
         with st.spinner("Fred is thinking..."):
@@ -413,13 +402,13 @@ Fred & the LBL Team"""
                     model=MODEL_NAME,
                     messages=[
                         {"role": "system", "content": "You are Fred, a professional goal-focused real estate advisor specializing in wellness and active lifestyle properties across the United States."},
-                        *st.session_state.chat_history["fred"]
+                        *st.session_state.chat_history[agent_key]
                     ],
                     max_tokens=800,
                     temperature=0.7
                 )
                 reply = response.choices[0].message.content
-                st.session_state.chat_history["fred"].append({"role": "assistant", "content": reply})
+                st.session_state.chat_history[agent_key].append({"role": "assistant", "content": reply})
                 st.chat_message("assistant").write(reply)
             except Exception as e:
                 st.error("Sorry, I'm having trouble right now. Try again soon.")
