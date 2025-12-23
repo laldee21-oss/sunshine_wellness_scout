@@ -26,7 +26,7 @@ def show():
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Inter:wght@400;500;600&display=swap');
         
         .stApp {
-            background: linear-gradient(to bottom, #f5f7fa, #e0e7f0);
+            background: linear_gradient(to bottom, #f5f7fa, #e0e7f0);
             color: #1e3a2f;
             font-family: 'Inter', sans-serif;
         }
@@ -116,9 +116,9 @@ def show():
     st.image("https://i.postimg.cc/cJqPm9BP/pexels-tessy-agbonome-521343232-18252407.jpg", caption="Fuel Your Longevity – Welcome to your nutrition journey")
 
     # Welcome & Disclaimer
-    st.markdown("### 🥗 HI! I'M NORA – Your Nutrition Coach for Longevity")
+    st.markdown("### 🥗 Hi! I'm Nora – Your Nutrition Coach for Longevity")
+    st.write("Welcome to my kitchen! I'm here to help you build delicious, sustainable eating habits that bring joy and support a longer, healthier life — perfectly tailored to you.")
     st.success("**This tool is completely free – no cost, no obligation! Your full plan will be emailed if requested.**")
-    st.write("I help you build sustainable, delicious eating habits that fit your life — focusing on balance, joy, and long-term health, tailored to your preferences.")
     st.warning("**Important**: I am not a registered dietitian or medical professional. My suggestions are general wellness education based on publicly available research. Always consult a qualified healthcare provider or registered dietitian before making dietary changes, especially if you have medical conditions.")
 
     # Name Input — blank by default, safe fallback
