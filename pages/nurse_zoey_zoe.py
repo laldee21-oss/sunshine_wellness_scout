@@ -26,7 +26,7 @@ def show():
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Inter:wght@400;500;600&display=swap');
         
         .stApp {
-            background: linear-gradient(to bottom, #f5f7fa, #e0e7f0);
+            background: linear_gradient(to bottom, #f5f7fa, #e0e7f0);
             color: #1e3a2f;
             font-family: 'Inter', sans-serif;
         }
@@ -116,9 +116,9 @@ def show():
     st.image("https://i.postimg.cc/BnFgfCTD/pexels-kampus-7551620.jpg", caption="LIVE BETTER LONGER – Welcome to your longevity lifestyle")
 
     # Welcome & Disclaimer
-    st.markdown("### 🩺 Hello! I'm Nurse Zoey Zoe – your friendly health educator")
+    st.markdown("### 🩺 Hello! I'm Nurse Zoey Zoe – Your Friendly Health Educator")
+    st.write("Welcome to my clinic! I'm here to help you understand your health, labs, symptoms, and preventive habits — all in support of living better longer.")
     st.success("**This tool is completely free – no cost, no obligation! Your full insights will be emailed if requested.**")
-    st.write("I provide general wellness education and help you understand symptoms, labs, and preventive habits — all to support your longevity journey.")
     st.warning("**Important**: I am not a doctor and do not provide medical diagnoses, treatments, or prescriptions. This is general education only. Always consult a licensed healthcare professional for personal medical advice.")
 
     # Name Input — blank by default, safe fallback
