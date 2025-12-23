@@ -1,8 +1,5 @@
 import streamlit as st
 
-with st.sidebar:
-    st.title("LBL Lifestyle Solutions")
-    st.caption("Your Holistic Longevity Blueprint ❤️")
 
 # ===================================================
 # FORCE HOME ON FRESH LOAD OR INVALID PAGE
@@ -218,4 +215,5 @@ elif st.session_state.current_page == "zoey":
 elif st.session_state.current_page == "nora":
     import pages.nora as nora_page
     nora_page.show()
+
 
