@@ -149,21 +149,30 @@ def show():
     </style>
     """, unsafe_allow_html=True)
 
-    # Force scroll to top — strong override for chat focus
+    # Force scroll to top — ultra-aggressive override for chat focus
     st.markdown("""
     <script>
-        function scrollToTop() {
+        function forceScrollToTop() {
             window.scrollTo(0, 0);
             const main = parent.document.querySelector('section.main');
-            if (main) main.scrollTop = 0;
+            if (main) {
+                main.scrollTop = 0;
+            }
         }
+
         // Immediate
-        scrollToTop();
-        // Multiple delays to beat chat input focus
-        setTimeout(scrollToTop, 100);
-        setTimeout(scrollToTop, 300);
-        setTimeout(scrollToTop, 500);
-        setTimeout(scrollToTop, 1000);
+        forceScrollToTop();
+
+        // Aggressive repeated attempts — beats chat focus every time
+        let attempts = 0;
+        const maxAttempts = 20;  // 20 x 100ms = 2 seconds
+        const interval = setInterval(() => {
+            forceScrollToTop();
+            attempts++;
+            if (attempts >= maxAttempts) {
+                clearInterval(interval);
+            }
+        }, 100);
     </script>
     """, unsafe_allow_html=True)
 
