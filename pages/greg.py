@@ -26,7 +26,7 @@ def show():
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Inter:wght@400;500;600&display=swap');
         
         .stApp {
-            background: linear-gradient(to bottom, #f5f7fa, #e0e7f0);
+            background: linear_gradient(to bottom, #f5f7fa, #e0e7f0);
             color: #1e3a2f;
             font-family: 'Inter', sans-serif;
         }
@@ -116,8 +116,8 @@ def show():
     st.image("https://i.postimg.cc/mDy2FKQg/outdoor-fitness-scaled.webp", caption="Greatness Await – Welcome to your longevity lifestyle")
 
     # Welcome & Disclaimer
-    st.markdown("### 💪 HI!!! I'M GREG – Your Awesome Personal Trainer. GET SOME!!!!")
-    st.write("I'm a motivated gym rat helping you build strength, endurance, and longevity. Let's get started by building you a personalized workout routine. Congratulations on choosing a longevity lifestyle. Your future self will thank you!")
+    st.markdown("### 💪 HI!!! I'M GREG – Your Awesome Personal Trainer")
+    st.write("Welcome to my gym! Let's get moving and build strength, endurance, and longevity together. Congratulations on choosing a healthier life — your future self is already thanking you!")
     st.warning("**Important**: I am not a certified personal trainer or medical professional. My suggestions are general wellness education. Always consult a qualified trainer or doctor before starting a new exercise program, especially if you have injuries or conditions.")
     st.success("**This tool is completely free – no cost, no obligation! Your full plan will be emailed if requested.**")
 
