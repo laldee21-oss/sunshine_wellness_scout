@@ -408,6 +408,20 @@ Fred & the LBL Team"""
         st.session_state.chat_history[agent_key].append({"role": "user", "content": prompt})
         st.chat_message("user").write(prompt)
 
+        # Blur chat input after load (disable auto-focus)
+        st.markdown("""
+        <script>
+            setTimeout(() => {
+                const inputs = document.querySelectorAll('input[type="text"]');
+                inputs.forEach(input => {
+                    if (input.placeholder.includes("Ask") || input.getAttribute('aria-label')?.includes('chat')) {
+                        input.blur();
+                    }
+                });
+            }, 500);
+        </script>
+        """, unsafe_allow_html=True)
+                
         with st.spinner("Fred is thinking..."):
             try:
                 response = client.chat.completions.create(
