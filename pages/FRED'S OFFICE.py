@@ -427,31 +427,36 @@ Fred & the LBL Team"""
 
         st.rerun()
     
-        # Floating Back to Top button (shows when scrolled down)
-        st.markdown("""
-        <div id="backToTopBtn" style="position: fixed; bottom: 80px; right: 20px; z-index: 1000; display: none;">
-            <button style="background-color: #2d6a4f; color: white; padding: 14px 20px; border-radius: 50px; border: none; font-size: 1.1rem; box-shadow: 0 4px 12px rgba(0,0,0,0.2); cursor: pointer;">
-                ↑ Top
-            </button>
-        </div>
-        <script>
-            const btn = document.getElementById('backToTopBtn');
-            const checkScroll = () => {
-                const scrolled = window.scrollY > 300 || 
-                                 (parent.document.querySelector('section.main') && parent.document.querySelector('section.main').scrollTop > 300);
-                btn.style.display = scrolled ? 'block' : 'none';
-            };
-            window.addEventListener('scroll', checkScroll);
-            const mainSection = parent.document.querySelector('section.main');
-            if (mainSection) mainSection.addEventListener('scroll', checkScroll);
-            btn.addEventListener('click', () => {
-                window.scrollTo({top: 0, behavior: 'smooth'});
-                if (mainSection) mainSection.scrollTo({top: 0, behavior: 'smooth'});
-            });
-            // Initial check
-            checkScroll();
-        </script>
-        """, unsafe_allow_html=True)
+    # Floating Back to Top button (shows when scrolled down)
+    st.markdown("""
+    <div id="backToTopBtn" style="position: fixed; bottom: 80px; right: 20px; z-index: 1000; display: none;">
+        <button style="background-color: #2d6a4f; color: white; padding: 14px 20px; border-radius: 50px; border: none; font-size: 1.1rem; box-shadow: 0 4px 12px rgba(0,0,0,0.2); cursor: pointer;">
+            ↑ Top
+        </button>
+    </div>
+    <script>
+        const btn = document.getElementById('backToTopBtn');
+        const checkScroll = () => {
+            const scrolled = window.pageYOffset > 300 || 
+                             (parent.document.body.scrollTop > 300) ||
+                             (parent.document.documentElement.scrollTop > 300) ||
+                             (parent.document.querySelector('section.main') && parent.document.querySelector('section.main').scrollTop > 300);
+            btn.style.display = scrolled ? 'block' : 'none';
+        };
+        // Run on load and scroll
+        window.addEventListener('load', checkScroll);
+        window.addEventListener('scroll', checkScroll);
+        const mainSection = parent.document.querySelector('section.main');
+        if (mainSection) mainSection.addEventListener('scroll', checkScroll);
+        // Click handler
+        btn.addEventListener('click', () => {
+            window.scrollTo({top: 0, behavior: 'smooth'});
+            if (mainSection) mainSection.scrollTo({top: 0, behavior: 'smooth'});
+        });
+        // Initial check
+        checkScroll();
+    </script>
+    """, unsafe_allow_html=True)
     
     # Footer
     st.markdown("---")
