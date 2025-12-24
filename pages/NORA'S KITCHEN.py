@@ -85,10 +85,56 @@ def show():
             margin: 35px 0;
             border-top: 1px solid #c0d8e0;
         }
+        /* Back to Top Button */
+        #backToTopBtn {
+            position: fixed;
+            bottom: 80px;
+            right: 20px;
+            z-index: 1000;
+            display: none;
+            background-color: #2d6a4f;
+            color: white;
+            padding: 14px 20px;
+            border-radius: 50px;
+            border: none;
+            font-size: 1.1rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            cursor: pointer;
+        }
         #report-anchor, #chat-anchor {
             margin-top: 100px;
         }
     </style>
+    """, unsafe_allow_html=True)
+
+    # Back to Top Button + Disable Chat Auto-Focus
+    st.markdown("""
+    <button id="backToTopBtn">↑ Back to Top</button>
+    <script>
+        const btn = document.getElementById('backToTopBtn');
+        const checkScroll = () => {
+            const scrolled = window.pageYOffset > 300 ||
+                             (parent.document.body.scrollTop > 300) ||
+                             (parent.document.documentElement.scrollTop > 300) ||
+                             (parent.document.querySelector('section.main') && parent.document.querySelector('section.main').scrollTop > 300);
+            btn.style.display = scrolled ? 'block' : 'none';
+        };
+        window.addEventListener('load', checkScroll);
+        window.addEventListener('scroll', checkScroll);
+        const mainSection = parent.document.querySelector('section.main');
+        if (mainSection) mainSection.addEventListener('scroll', checkScroll);
+        btn.addEventListener('click', () => {
+            window.scrollTo({top: 0, behavior: 'smooth'});
+            if (mainSection) mainSection.scrollTo({top: 0, behavior: 'smooth'});
+        });
+        checkScroll();
+
+        // Disable auto-focus on chat input to prevent unwanted scroll-down on load/refresh
+        setTimeout(() => {
+            const chatInput = document.querySelector('input[placeholder*="Ask Nora"]');
+            if (chatInput) chatInput.blur();
+        }, 500);
+    </script>
     """, unsafe_allow_html=True)
 
     # Hero image
@@ -148,7 +194,7 @@ The more you select, the more uniquely tailored your meal plan and our conversat
     st.caption("🔮 Your choices will shape both your personalized meal plan and all follow-up chats!")
     st.markdown("</div>", unsafe_allow_html=True)
 
-    # BLENDED PERSONALITY PROMPT WITH GUARDRAILS AND NAME USAGE
+    # BLENDED PERSONALITY PROMPT WITH GUARDRAILS AND NAME
     nora_trait_map = {
         "Witty & Warm Foodie (default)": "You are witty, warm, and passionate about food. Use light food-related puns naturally and joyfully.",
         "Calm & Reassuring": "Use a calm, patient, grounding tone. Focus on reassurance and ease.",
@@ -226,7 +272,7 @@ Adapt tone in real-time based on user input while honoring the selected traits.
         - Make family-friendly Mediterranean recipes 👨‍👩‍👧‍👦
         """)
 
-    # Form inputs (all unchanged — your full original form here)
+    # Form inputs (unchanged)
     st.markdown("### Tell Nora a little bit about you and your eating habits 🍴")
     st.write("**Be as detailed as possible!** The more you share about your age, goals, preferences, allergies, budget, and current diet, the better Nora can help. 😊")
     st.caption("💡 Tip: Include favorite foods, foods to avoid, cooking time available, and health priorities!")
@@ -309,7 +355,7 @@ Adapt tone in real-time based on user input while honoring the selected traits.
     if "full_plan_for_email" not in st.session_state:
         st.session_state.full_plan_for_email = None
 
-    # GENERATE PLAN — NO DISPLAY HERE
+    # GENERATE PLAN
     if st.button("Generate My Custom Meal Plan 🍴", type="primary"):
         with st.spinner("Nora is crafting your personalized nutrition plan... ✨"):
             core_prompt = f"""
@@ -381,7 +427,6 @@ Greg's plan: {greg_plan_text or 'None provided'}
                 st.session_state.display_plan = display_plan
                 st.session_state.full_plan_for_email = full_plan
 
-                # Add only a short note to chat history (not the full report)
                 st.session_state.chat_history[agent_key].append({"role": "assistant", "content": f"Hey {st.session_state.get('user_name', 'friend')}! 🎉 Your personalized meal plan is ready below. Feel free to ask me anything about it! 🍓"})
 
                 # Scroll to report
@@ -398,7 +443,7 @@ Greg's plan: {greg_plan_text or 'None provided'}
                 st.error("Nora is in the kitchen... try again soon. 🔪")
                 st.caption(f"Error: {str(e)}")
 
-    # SINGLE REPORT DISPLAY (ONLY HERE)
+    # SINGLE REPORT DISPLAY
     if st.session_state.display_plan:
         st.markdown("<div id='report-anchor'></div>", unsafe_allow_html=True)
         st.success("Nora's custom nutrition plan for you! 🎉")
