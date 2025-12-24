@@ -22,7 +22,7 @@ def show():
     if agent_key not in st.session_state.chat_history:
         st.session_state.chat_history[agent_key] = []
 
-    # DESIGN & STYLING
+    # DESIGN & STYLING WITH FIXED BACK TO TOP BUTTON
     st.markdown("""
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Inter:wght@400;500;600&display=swap');
@@ -85,19 +85,19 @@ def show():
             margin: 35px 0;
             border-top: 1px solid #c0d8e0;
         }
-        /* Back to Top Button */
+        /* Back to Top Button — FIXED POSITIONING */
         #backToTopBtn {
             position: fixed;
-            bottom: 80px;
+            bottom: 140px;  /* Raised to clear chat bar */
             right: 20px;
-            z-index: 1000;
+            z-index: 900;   /* Below chat input (usually 1000+) */
             display: none;
             background-color: #2d6a4f;
             color: white;
-            padding: 14px 20px;
+            padding: 12px 18px;
             border-radius: 50px;
             border: none;
-            font-size: 1.1rem;
+            font-size: 1rem;
             box-shadow: 0 4px 12px rgba(0,0,0,0.2);
             cursor: pointer;
         }
@@ -131,8 +131,12 @@ def show():
 
         // Disable auto-focus on chat input to prevent unwanted scroll-down on load/refresh
         setTimeout(() => {
-            const chatInput = document.querySelector('input[placeholder*="Ask Nora"]');
-            if (chatInput) chatInput.blur();
+            const chatInputs = document.querySelectorAll('input[type="text"]');
+            chatInputs.forEach(input => {
+                if (input.placeholder && input.placeholder.includes("Ask Nora")) {
+                    input.blur();
+                }
+            });
         }, 500);
     </script>
     """, unsafe_allow_html=True)
