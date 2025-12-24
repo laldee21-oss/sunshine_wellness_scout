@@ -22,7 +22,7 @@ def show():
     if agent_key not in st.session_state.chat_history:
         st.session_state.chat_history[agent_key] = []
 
-    # DESIGN & STYLING (same as Nora v2.1 — with bottom-left button)
+    # DESIGN & STYLING (same as Nora v2.1)
     st.markdown("""
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Inter:wght@400;500;600&display=swap');
@@ -146,7 +146,7 @@ def show():
     </script>
     """, unsafe_allow_html=True)
 
-    # Hero image (correct Zoey image)
+    # Hero image
     st.image("https://images.pexels.com/photos/5215021/pexels-photo-5215021.jpeg", caption="Your Health Journey – Welcome to your longevity wellness 🩺")
 
     # Welcome
@@ -272,7 +272,7 @@ Adapt tone in real-time based on user input while honoring the selected traits.
         - Suggest preventive screenings for my age 🩺
         """)
 
-    # Form inputs (clean placeholder — replace with your actual Zoey form when ready)
+    # Form inputs (placeholder — replace with your actual Zoey form)
     st.markdown("### Tell Nurse Zoey Zoe a little bit about you and your health 🩺")
     st.write("**Be as detailed as possible!** The more you share about your age, symptoms, labs, concerns, and goals, the better I can help. 😊")
     st.caption("💡 Tip: Upload labs, describe symptoms, or ask about prevention!")
@@ -291,8 +291,6 @@ Adapt tone in real-time based on user input while honoring the selected traits.
     # GENERATE INSIGHTS
     if st.button("Get Insights 🩺", type="primary"):
         with st.spinner("Nurse Zoey Zoe is reviewing your health profile... ✨"):
-            # (Your original Zoey prompt logic here — adapted to use personality prompt)
-            # For now, placeholder
             core_prompt = """
 ### Health Insights Summary
 Key takeaways from your profile.
@@ -301,7 +299,13 @@ Lifestyle habits for longevity.
 ### When to See a Doctor
 Red flags and next steps.
 """
-            # ... (add your full Zoey prompt building)
+            # Add optional sections as needed (like Nora)
+
+            full_insights_prompt = core_prompt + """
+### Detailed Lab Explanation (if uploaded)
+### Long-Term Wellness Plan
+### Frequently Asked Questions
+"""
 
             base_prompt = f"""
 User name: {st.session_state.user_name or 'friend'}
@@ -312,6 +316,7 @@ Labs uploaded: {'Yes' if labs_upload else 'No'}
 """
 
             try:
+                # Display insights
                 display_response = client.chat.completions.create(
                     model=MODEL_NAME,
                     messages=[{"role": "system", "content": st.session_state.zoey_personality_prompt}, {"role": "user", "content": base_prompt + "\n" + core_prompt}],
@@ -320,13 +325,21 @@ Labs uploaded: {'Yes' if labs_upload else 'No'}
                 )
                 display_insights = display_response.choices[0].message.content
 
-                # Full version logic here...
+                # Full insights for email
+                full_response = client.chat.completions.create(
+                    model=MODEL_NAME,
+                    messages=[{"role": "system", "content": st.session_state.zoey_personality_prompt}, {"role": "user", "content": base_prompt + "\n" + full_insights_prompt}],
+                    max_tokens=3500,
+                    temperature=0.7
+                )
+                full_insights = full_response.choices[0].message.content
 
                 st.session_state.display_insights = display_insights
-                # st.session_state.full_insights_for_email = full_insights
+                st.session_state.full_insights_for_email = full_insights
 
                 st.session_state.chat_history[agent_key].append({"role": "assistant", "content": f"Hey {st.session_state.get('user_name', 'friend')}! 🎉 Your personalized health insights are ready below. Feel free to ask me anything about them! 🩺"})
 
+                # Scroll to insights
                 st.markdown("""
                 <script>
                     const reportAnchor = document.getElementById('report-anchor');
@@ -354,9 +367,9 @@ Labs uploaded: {'Yes' if labs_upload else 'No'}
         - Recommend when to see a doctor? 👩‍⚕️
         """)
 
-        st.info("📧 Want the **complete version**? Fill in the email form below!")
+        st.info("📧 Want the **complete version** with every section? Fill in the email form below!")
 
-    # EMAIL FORM
+    # EMAIL FORM — NOW INCLUDED
     if st.session_state.full_insights_for_email:
         st.markdown("### Get Your Full Insights Emailed (Save & Share) 📧")
         with st.form("lead_form_zoey"):
@@ -368,9 +381,36 @@ Labs uploaded: {'Yes' if labs_upload else 'No'}
                 if not email:
                     st.error("Email required!")
                 else:
-                    # (your email sending logic)
-                    st.success(f"Full insights sent to {email}! Check your inbox. 🎉")
-                    st.balloons()
+                    insights_to_send = st.session_state.full_insights_for_email
+                    email_body = f"""Hi {st.session_state.user_name or 'friend'},
+
+Thank you for exploring health with Nurse Zoey Zoe at LBL Lifestyle Solutions!
+Here's your COMPLETE personalized health insights:
+{insights_to_send}
+
+Take good care — you're on the path to longevity!
+Best,
+Nurse Zoey Zoe & the LBL Team 🩺"""
+                    data = {
+                        "from": "reports@lbllifestyle.com",
+                        "to": [email],
+                        "cc": [st.secrets["YOUR_EMAIL"]],
+                        "subject": f"{st.session_state.user_name or 'Client'}'s Complete LBL Health Insights",
+                        "text": email_body
+                    }
+                    headers = {
+                        "Authorization": f"Bearer {st.secrets['RESEND_API_KEY']}",
+                        "Content-Type": "application/json"
+                    }
+                    try:
+                        response = requests.post("https://api.resend.com/emails", json=data, headers=headers)
+                        if response.status_code == 200:
+                            st.success(f"Full insights sent to {email}! Check your inbox. 🎉")
+                            st.balloons()
+                        else:
+                            st.error(f"Send failed: {response.text}")
+                    except Exception as e:
+                        st.error(f"Send error: {str(e)}")
 
     # CHAT SECTION
     st.markdown("<div id='chat-anchor'></div>", unsafe_allow_html=True)
