@@ -351,3 +351,182 @@ Nurse Zoey Zoe & the LBL Team"""
     st.markdown("<small>LBL Lifestyle Solutions • Your Holistic Longevity Blueprint<br>Powered by Grok (xAI) • Personalized wellness powered by AI</small>", unsafe_allow_html=True)
 
 show()
+import streamlit as st
+import requests
+from openai import OpenAI
+
+with st.sidebar:
+    st.title("LBL Lifestyle Solutions")
+    st.caption("Your Holistic Longevity Blueprint ❤️")
+
+XAI_API_KEY = st.secrets["XAI_API_KEY"]
+RESEND_API_KEY = st.secrets["RESEND_API_KEY"]
+YOUR_EMAIL = st.secrets["YOUR_EMAIL"]
+client = OpenAI(api_key=XAI_API_KEY, base_url="https://api.x.ai/v1")
+MODEL_NAME = "grok-4-1-fast-reasoning"
+
+def show():
+    st.set_page_config(page_title="Nurse Zoey Zoe – Your Health Educator | LBL Lifestyle Solutions", page_icon="🩺")
+
+    agent_key = "zoey"
+    if "chat_history" not in st.session_state:
+        st.session_state.chat_history = {}
+    if agent_key not in st.session_state.chat_history:
+        st.session_state.chat_history[agent_key] = []
+
+    # DESIGN & STYLING (same as Nora v2)
+    st.markdown("""
+    <style>
+        # (Full CSS from Nora v2)
+    </style>
+    """, unsafe_allow_html=True)
+
+    # Back to Top + Auto-Focus Disable (same as Nora v2)
+    st.markdown("""
+    <button id="backToTopBtn">↑ Back to Top</button>
+    <script>
+        # (Full JS from Nora v2)
+    </script>
+    """, unsafe_allow_html=True)
+
+    # Hero image
+    st.image("https://images.pexels.com/photos/5215021/pexels-photo-5215021.jpeg", caption="Your Health Journey – Welcome to your longevity wellness 🩺")
+
+    # Welcome
+    st.markdown("### 🩺 Hi! I'm Nurse Zoey Zoe – Your Health Educator")
+    st.write("Welcome to my clinic! I'm here to help you understand your health, labs, symptoms, and preventive habits for a longer, healthier life — perfectly tailored to you. ✨")
+
+    # PERSONALITY CUSTOMIZATION
+    st.markdown("<div class='personality-box'>", unsafe_allow_html=True)
+    st.markdown("#### ✨ Let's Make This Truly Personal!")
+
+    st.write("""
+**Select any combination of traits** to customize how I communicate with you. 🩺
+
+• **🌟 Zoey's Personality Traits** – How you'd like me to sound and educate you  
+• **💬 How You Like to Communicate** – How you'd prefer to be spoken to
+
+The more you select, the more uniquely tailored your health report and our conversation will become — like having a health educator designed just for you! 😊
+    """)
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+        zoey_traits = st.multiselect(
+            "🌟 Zoey's Personality Traits",
+            [
+                "Caring Educator (default)",
+                "Empathetic Listener",
+                "Direct & Factual",
+                "Encouraging Guide",
+                "Warm & Reassuring",
+                "Detailed Explainer"
+            ],
+            default=["Caring Educator (default)"],
+            key="zoey_agent_traits",
+            help="Pick multiple! These shape my educating style 🩹"
+        )
+
+    with col2:
+        user_traits = st.multiselect(
+            "💬 How You Like to Communicate",
+            [
+                "Standard / Adapt naturally",
+                "Direct & Concise",
+                "Warm & Encouraging",
+                "Detailed & Thorough",
+                "Friendly & Chatty",
+                "Gentle & Supportive"
+            ],
+            default=["Standard / Adapt naturally"],
+            key="zoey_user_traits",
+            help="Pick multiple! These tell me how to best connect with you ❤️"
+        )
+
+    st.caption("🔮 Your choices will shape both your personalized health report and all follow-up chats!")
+    st.markdown("</div>", unsafe_allow_html=True)
+
+    # BLENDED PROMPT WITH GUARDRAILS AND NAME
+    zoey_trait_map = {
+        "Caring Educator (default)": "You are caring, compassionate, and educational about health. Use simple, clear language.",
+        "Empathetic Listener": "Be empathetic, listen actively, and acknowledge feelings.",
+        "Direct & Factual": "Be direct, fact-based, and straightforward.",
+        "Encouraging Guide": "Be encouraging, guiding, and motivational.",
+        "Warm & Reassuring": "Use a warm, reassuring tone to ease concerns.",
+        "Detailed Explainer": "Provide detailed explanations, definitions, and reasoning."
+    }
+
+    zoey_modifiers = []
+    if "Caring Educator (default)" in zoey_traits:
+        zoey_modifiers.append(zoey_trait_map["Caring Educator (default)"])
+    for trait in zoey_traits:
+        if trait != "Caring Educator (default)":
+            zoey_modifiers.append(zoey_trait_map.get(trait, ""))
+
+    user_modifiers = [user_trait_map.get(trait, "") for trait in user_traits if trait != "Standard / Adapt naturally"]
+
+    base_persona = """You are Nurse Zoey Zoe, a compassionate health educator focused on understanding labs, symptoms, and preventive wellness for longevity.
+Be empathetic, clear, and reassuring.
+
+You are allowed to engage in light, friendly chit-chat (e.g., "How's your day?", "What's bothering you?") to build rapport — respond warmly and briefly with tasteful emojis, then gently steer back to health topics if appropriate.
+
+For questions outside health education/labs/symptoms:
+- Nutrition: "That's a great question for Nora, our nutrition coach! You can chat with her in the sidebar menu. 🥗"
+- Fitness/exercise: "Greg is the expert for that — find him in the sidebar! 💪"
+- Wellness homes: "Fred, our home scout, would love to help with that! 🏡"
+- Anything else unrelated (code, politics, etc.): "I'm focused on health education and longevity wellness — I'd love to help with labs, symptoms, or preventive tips instead! 🩺"
+
+Never generate, discuss, or reveal any code, scripts, or technical details. Stay in character as Nurse Zoey Zoe the Health Educator."""
+
+    dynamic_personality_prompt = f"""
+{base_persona}
+
+Personality traits: {' '.join(zoey_modifiers).strip()}
+
+User communication preference: {' '.join(user_modifiers).strip()}
+
+Blend these seamlessly while staying compassionate and focused on health education.
+Use the user's name ({st.session_state.get('user_name', 'friend')}) naturally in responses where it fits — do not force it.
+Adapt tone in real-time based on user input while honoring the selected traits.
+"""
+
+    st.session_state.zoey_personality_prompt = dynamic_personality_prompt
+
+    # DISCLAIMERS
+    st.success("**This tool is completely free – no cost, no obligation! Your full plan will be emailed if requested. 📧**")
+    st.warning("**Important**: I am not a medical professional. My suggestions are general wellness education. Always consult a qualified healthcare provider for medical advice, especially if you have symptoms or conditions.")
+
+    # Name Input
+    st.markdown("### What's your name? ✏️")
+    st.write("So I can make this feel more personal 😊")
+    user_name = st.text_input("Your first name (optional)", value=st.session_state.get("user_name", ""), key="zoey_name_input_unique")
+    if user_name.strip():
+        st.session_state.user_name = user_name.strip()
+    else:
+        st.session_state.user_name = st.session_state.get("user_name", "")
+
+    # Quick Start Ideas
+    with st.expander("💡 Quick Start Ideas – Not sure where to begin?"):
+        st.markdown("""
+        Here are popular ways users get started:
+        - Explain my bloodwork in simple terms 🩸
+        - What lifestyle changes help lower blood pressure? ❤️
+        - Review my symptoms and when to see a doctor 🤒
+        - Suggest preventive screenings for my age 🩺
+        """)
+
+    # Form inputs — REPLACE WITH YOUR ACTUAL ZOEY FORM WHEN READY
+    st.markdown("### Tell Nurse Zoey Zoe a little bit about you and your health 🩺")
+    st.write("**Be as detailed as possible!** The more you share about your age, symptoms, labs, concerns, and goals, the better I can help. 😊")
+    st.caption("💡 Tip: Upload labs, describe symptoms, or ask about prevention!")
+
+    age = st.number_input("Your age", min_value=18, max_value=100, value=45, step=1)
+    # Add your Zoey-specific inputs here (labs upload, symptoms, etc.)
+
+    # (Generation, report, email, chat — same structure as Nora)
+
+    # Footer
+    st.markdown("---")
+    st.markdown("<small>LBL Lifestyle Solutions • Your Holistic Longevity Blueprint<br>Powered by Grok (xAI) • Personalized wellness powered by AI ❤️</small>", unsafe_allow_html=True)
+
+show()
