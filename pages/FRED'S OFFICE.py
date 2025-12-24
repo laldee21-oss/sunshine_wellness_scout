@@ -1,4 +1,5 @@
 import streamlit as st
+import streamlit as st
 import requests
 from openai import OpenAI
 
@@ -6,7 +7,6 @@ with st.sidebar:
     st.title("LBL Lifestyle Solutions")
     st.caption("Your Holistic Longevity Blueprint ❤️")
 
-# Secrets
 XAI_API_KEY = st.secrets["XAI_API_KEY"]
 RESEND_API_KEY = st.secrets["RESEND_API_KEY"]
 YOUR_EMAIL = st.secrets["YOUR_EMAIL"]
@@ -84,14 +84,14 @@ def show():
     if agent_key not in st.session_state.chat_history:
         st.session_state.chat_history[agent_key] = []
 
-    # DESIGN & STYLING (same as Nora)
+    # DESIGN & STYLING (same as Nora v2)
     st.markdown("""
     <style>
-        # (Full CSS from Nora v2, including #backToTopBtn)
+        # (Full CSS from Nora v2 — copy from Nora)
     </style>
     """, unsafe_allow_html=True)
 
-    # Back to Top + Auto-Focus Disable (same as Nora)
+    # Back to Top + Auto-Focus Disable (same as Nora v2)
     st.markdown("""
     <button id="backToTopBtn">↑ Back to Top</button>
     <script>
@@ -225,7 +225,7 @@ Adapt tone in real-time based on user input while honoring the selected traits.
         - Modify my current home for aging in place 🛠️
         """)
 
-    # Form inputs (your original Fred form)
+    # Form inputs
     st.markdown("### Tell Fred a little bit about you and your dream wellness home 🏡")
     st.write("**Be as detailed as possible!** The more you share about your age, family, hobbies, must-haves, daily routine, and wellness goals, the more accurate and personalized my recommendations will be. 😊")
     st.caption("💡 Tip: Include age, family size, favorite activities, deal-breakers, and why longevity matters to you!")
@@ -306,25 +306,16 @@ Adapt tone in real-time based on user input while honoring the selected traits.
                 if "Top Property Recommendations" in report_sections:
                     optional_prompt += "### Top Property Recommendations\n1-3 specific property ideas with estimated prices, key wellness features, and why they fit (4-6 sentences each).\n\n"
 
-                full_report_prompt = core_prompt + """
+                full_report_prompt = core_prompt + optional_prompt + """
 ### Wellness/Outdoor Highlights
-6-10 sentences.
 ### Cost of Living & Financial Breakdown
-Detailed comparison.
 ### Healthcare Access & Longevity Metrics
-Top hospitals, etc.
 ### Community & Social Wellness
-Local groups.
 ### Climate & Seasonal Wellness Tips
-Year-round activity.
 ### Transportation & Daily Convenience
-Walkability.
 ### Future-Proofing for Aging in Place
-Accessible homes.
 ### Sample Daily Wellness Routine in This Area
-Example day.
 ### Top Property Recommendations
-1-3 ideas.
 """
 
                 base_prompt = f"""
@@ -336,7 +327,6 @@ Preferred location(s): {location or 'wellness-friendly areas across the U.S.'}
 """
 
                 try:
-                    # Display report
                     display_response = client.chat.completions.create(
                         model=MODEL_NAME,
                         messages=[{"role": "system", "content": st.session_state.fred_personality_prompt}, {"role": "user", "content": base_prompt + "\n" + core_prompt + optional_prompt}],
@@ -345,7 +335,6 @@ Preferred location(s): {location or 'wellness-friendly areas across the U.S.'}
                     )
                     display_report = display_response.choices[0].message.content
 
-                    # Full report
                     full_response = client.chat.completions.create(
                         model=MODEL_NAME,
                         messages=[{"role": "system", "content": st.session_state.fred_personality_prompt}, {"role": "user", "content": base_prompt + "\n" + full_report_prompt}],
@@ -354,7 +343,6 @@ Preferred location(s): {location or 'wellness-friendly areas across the U.S.'}
                     )
                     full_report = full_response.choices[0].message.content
 
-                    # Add images
                     display_report_with_images = add_images_to_report(display_report, location_hint, client_needs)
                     full_report_with_images = add_images_to_report(full_report, location_hint, client_needs)
 
@@ -363,7 +351,6 @@ Preferred location(s): {location or 'wellness-friendly areas across the U.S.'}
 
                     st.session_state.chat_history[agent_key].append({"role": "assistant", "content": f"Hey {st.session_state.get('user_name', 'friend')}! 🎉 Your personalized wellness home report is ready below. Feel free to ask me anything about it! 🏡"})
 
-                    # Scroll to report
                     st.markdown("""
                     <script>
                         const reportAnchor = document.getElementById('report-anchor');
