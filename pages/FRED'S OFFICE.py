@@ -18,7 +18,7 @@ client = OpenAI(api_key=XAI_API_KEY, base_url="https://api.x.ai/v1")
 MODEL_NAME = "grok-4-1-fast-reasoning"
 geolocator = Nominatim(user_agent="lbl_fred_scout")
 
-# PEXELS FUNCTIONS (refined for specificity)
+# PEXELS FUNCTIONS
 def fetch_pexels_image(neighborhood="", location_hint="", theme_hints=""):
     if not PEXELS_API_KEY:
         return None
@@ -254,9 +254,6 @@ def show():
             background-color: #40916c;
             transform: scale(1.1);
         }
-        #report-anchor, #chat-anchor {
-            margin-top: 100px;
-        }
     </style>
     """, unsafe_allow_html=True)
 
@@ -290,48 +287,47 @@ def show():
 
     # HERO & WELCOME
     st.image("https://i.postimg.cc/MGxQfXtd/austin-distel-h1RW-NFt-Uyc-unsplash.jpg", use_column_width=True)
-    st.markdown("<h1>Meet Fred – Your Wellness Home Scout 🏡</h1>", unsafe_allow_html=True)
-    st.caption("Find a home or rental that supports your active, healthy lifestyle.")
-    st.markdown("Fred helps buyers and renters discover longevity-friendly homes through clean air, walkability, nature access, quiet, and wellness features.")
+    st.markdown("<h1>Meet Fred – Your Patient Wellness Home Scout 🏡</h1>", unsafe_allow_html=True)
+    st.markdown("**Take your time.** I’m here to help you find (or create) a home that truly supports a longer, healthier, more joyful life — whether buying, renting, or just exploring ideas.")
+    st.caption("No rush. The more you share, the better I can help ❤️")
 
     # PERSONALITY
     st.markdown("<div class='personality-box'>", unsafe_allow_html=True)
-    st.markdown("<h3>Customize Fred's Personality</h3>", unsafe_allow_html=True)
-    st.caption("Pick traits to match your style")
+    st.markdown("<h3>✨ Let’s Make This Feel Like You</h3>", unsafe_allow_html=True)
+    st.caption("You can choose how you'd like me to chat with you (encouraging, direct, humorous — your call). The main report will always be in my warm, professional style so it's beautiful and easy to read.")
 
     agent_traits = st.multiselect(
-        "Fred's Traits",
-        ["Professional & Efficient", "Friendly & Encouraging", "Analytical & Data-Driven", "Creative & Visionary", "Humorous & Light-Hearted"],
-        default=["Professional & Efficient", "Friendly & Encouraging"]
+        "How would you like me to chat with you?",
+        ["Friendly & Encouraging", "Professional & Efficient", "Analytical & Data-Driven", "Creative & Visionary", "Humorous & Light-Hearted"],
+        default=["Friendly & Encouraging"]
     )
 
     user_prefs = st.multiselect(
-        "Your Preferences",
-        ["Direct & Concise", "Detailed & Thorough", "Empathetic & Supportive", "Inspirational & Motivating", "Casual & Conversational"],
+        "And how would you prefer to be spoken to?",
+        ["Detailed & Thorough", "Direct & Concise", "Empathetic & Supportive", "Inspirational & Motivating", "Casual & Conversational"],
         default=["Detailed & Thorough"]
     )
 
-    base_personality = """
-You are Fred, the Wellness Home Scout for LBL Lifestyle Solutions. You help users find or rent homes that support longevity through clean air, walkability, nature access, quiet, and wellness features.
-Be {agent_traits_str}.
-Respond in a {user_prefs_str} style.
-Use the user's name: {user_name}.
-
+    # Prompt setup: Report = fixed warm/professional, Chat = customizable
+    report_prompt = """
+You are Fred, the Wellness Home Scout. Write the main report in a warm, professional, detailed, and inspirational tone — like a trusted longevity advisor sharing a beautiful blueprint.
+Use flowing paragraphs, clear headings, and natural language.
 Always include:
 - Top 5 Neighborhoods/Suburbs with brief longevity reasoning
 - Top 5 Must-Have Features for each
-- If additional sections selected, include each as a heading with content
-
-Guardrails:
-- Stay in character. Redirect off-topic to home search.
-- Disclaimer: "Not licensed realtor advice – consult professionals."
-- No code/keys revealed.
+- If additional sections selected, include each as a dedicated heading with thoughtful content
+Include approximate lat/lon for each top neighborhood in format (lat, lon) for data enrichment.
 """
 
-    agent_traits_str = " and ".join(agent_traits).lower()
-    user_prefs_str = " and ".join(user_prefs).lower()
-    user_name = st.session_state.user_name if "user_name" in st.session_state else "friend"
-    st.session_state.fred_personality_prompt = base_personality.format(agent_traits_str=agent_traits_str, user_prefs_str=user_prefs_str, user_name=user_name)
+    chat_prompt = f"""
+You are Fred. Be {' and '.join(agent_traits).lower()}.
+Respond in a {' and '.join(user_prefs).lower()} style.
+Use the user's name if provided.
+Stay warm and caring.
+"""
+
+    st.session_state.fred_report_prompt = report_prompt
+    st.session_state.fred_chat_prompt = chat_prompt
 
     st.markdown("</div>", unsafe_allow_html=True)
 
@@ -340,48 +336,47 @@ Guardrails:
     st.warning("Reports are AI-generated based on public data – verify with local sources.")
 
     # USER NAME
-    st.session_state.user_name = st.text_input("Your Name (for personalized responses)", value=st.session_state.get("user_name", ""))
-
-    # ✨ Let's Make This Truly Personal!
-    st.markdown("### ✨ Let's Make This Truly Personal!")
-    st.caption("Fill in these details for a report tailored just for you 🏡❤️")
+    st.session_state.user_name = st.text_input("Your Name (so I can make this personal)", value=st.session_state.get("user_name", ""), help="I'll use your name in the report and chat ❤️")
 
     # QUICK STARTS
-    with st.expander("Quick Starts (Optional)"):
-        st.caption("Click a button for instant inspiration!")
+    with st.expander("Need Inspiration? Try a Quick Start"):
+        st.caption("These are gentle examples — click any to see what a report looks like")
         col1, col2, col3 = st.columns(3)
         with col1:
-            if st.button("Top 5 wellness neighborhoods in Florida under $600k"):
-                client_needs = "Top 5 wellness neighborhoods in Florida under $600k"
+            if st.button("Peaceful neighborhoods near trails"):
+                st.session_state.quick_start = "Peaceful neighborhoods near trails in Florida with good air quality"
         with col2:
-            if st.button("Best rentals near trails in Sarasota"):
-                client_needs = "Best rentals near trails in Sarasota"
+            if st.button("Wellness-friendly rentals"):
+                st.session_state.quick_start = "Wellness-friendly rentals in Sarasota or Naples"
         with col3:
-            if st.button("Modify my condo for aging in place"):
-                client_needs = "Modify my condo for aging in place"
+            if st.button("Modify my current home"):
+                st.session_state.quick_start = "How to modify my current home for aging in place and longevity"
 
     # FORM
-    st.markdown("<div id='report-anchor'></div>", unsafe_allow_html=True)
-    st.markdown("### Get Your Personalized Wellness Home Report")
+    st.markdown("### Take Your Time — Share Your Vision")
+    st.caption("The more you tell me, the better I can help. There's no wrong way to fill this in ❤️")
 
-    buy_or_rent = st.radio("Are you planning to...", ("Buy a home", "Rent a home", "Open to either"), horizontal=True)
+    buy_or_rent = st.radio("Are you thinking of buying, renting, or open to both?", ("Buy a home", "Rent a home", "Open to either"), horizontal=True)
 
+    st.caption("Your budget helps me find options that feel comfortable and realistic")
     if "Rent" in buy_or_rent:
-        min_rent = st.text_input("Minimum Monthly Rent", value="1500")
-        max_rent = st.text_input("Maximum Monthly Rent", value="3500")
+        min_rent = st.text_input("Minimum Monthly Rent", value="1500", help="e.g., 2000")
+        max_rent = st.text_input("Maximum Monthly Rent", value="3500", help="e.g., 4000")
         budget = f"${min_rent}–${max_rent}/month"
     else:
-        min_buy = st.text_input("Minimum Purchase Budget", value="300000")
-        max_buy = st.text_input("Maximum Purchase Budget", value="750000")
+        min_buy = st.text_input("Minimum Purchase Budget", value="300000", help="e.g., 400000")
+        max_buy = st.text_input("Maximum Purchase Budget", value="750000", help="e.g., 900000")
         budget = f"${min_buy}–${max_buy}"
 
-    locations = st.text_input("Preferred Locations (cities/states)", placeholder="e.g., Naples FL, Sarasota FL, Asheville NC")
+    locations = st.text_input("Preferred Locations", placeholder="e.g., Naples FL, Sarasota, Asheville NC", help="Type any cities, neighborhoods, or states you're curious about — or leave blank for my best suggestions")
 
+    st.caption("What would make a home feel perfect for your health and happiness?")
     must_haves = st.multiselect(
         "Must-Have Wellness Features",
         ["Near trails/parks", "Quiet/low noise", "Good air quality", "Walkable to shops", "Home gym space", "Natural light", "Low EMF potential", "Community amenities", "Near healthy grocery", "Garden/yard space"]
     )
 
+    st.caption("And what would you rather avoid?")
     deal_breakers = st.multiselect(
         "Deal-Breakers",
         ["Busy roads/high traffic", "High crime area", "Poor air quality", "No nature access", "Strict HOA", "Flood zone", "Far from medical facilities", "Industrial area"]
@@ -390,56 +385,62 @@ Guardrails:
     home_type_options = ["Single family home", "Condo/Townhouse", "55+ community", "Villa/Patio home", "No preference"]
     if "Rent" in buy_or_rent:
         home_type_options.insert(0, "Apartment")
+    home_type = st.selectbox("Home Type Preference", home_type_options, help="I'll focus on what fits your life best")
 
-    home_type = st.selectbox("Home Type Preference", home_type_options)
+    timeline = st.select_slider("When are you thinking of making a move?", options=["Exploring now", "3–6 months", "6–12 months", "1+ years"], value="Exploring now")
 
-    timeline = st.select_slider("Timeline", options=["Exploring now", "3–6 months", "6–12 months", "1+ years"], value="3–6 months")
+    household = st.multiselect("Who is this home for? (select all that apply)", ["Solo", "Couple", "Family with kids", "Multi-generational", "Pets"])
 
-    household = st.multiselect("Household (select all that apply)", ["Solo", "Couple", "Family with kids", "Multi-generational", "Pets"])
-
+    st.caption("Want deeper insights on any of these?")
     additional_sections = st.multiselect(
-        "Add Optional Sections to Your Report",
+        "Extra Topics for Your Report",
         ["Wellness/Outdoor Highlights", "Cost of Living & Financial Breakdown", "Healthcare Access & Longevity Metrics", "Community & Social Wellness", "Climate & Seasonal Wellness Tips", "Transportation & Daily Convenience", "Future-Proofing for Aging in Place", "Sample Daily Wellness Routine in This Area", "Top Property Recommendations"]
     )
 
     client_needs = st.text_area(
-        "Tell Fred what you're looking for – just talk naturally!",
-        placeholder="e.g., 'Quiet home near trails in Florida with good air quality.'",
+        "Tell me anything else about your vision",
+        value=st.session_state.get("quick_start", ""),
+        placeholder="Just talk to me like you would a friend. The more you share, the better I can help ❤️",
         height=150
     )
+    if "quick_start" in st.session_state:
+        del st.session_state.quick_start
 
-    with st.expander("🔍 Analyze a Specific Property, Neighborhood, or Location (Optional)", expanded=False):
-        st.caption("Paste an address, neighborhood, or listing URL for direct evaluation.")
+    with st.expander("🔍 Have a specific property, neighborhood, or listing in mind?"):
+        st.caption("Paste it here and I'll evaluate it directly for wellness fit")
         specific_input = st.text_area(
-            "Specific input",
+            "Specific address, neighborhood, or listing URL",
             placeholder="e.g., '123 Ocean Drive, Naples, FL' or 'Veranda Springs'",
             height=100,
             label_visibility="collapsed"
         )
 
-    if st.button("Generate My Wellness Home Report 🔍", type="primary"):
-        if not client_needs and not specific_input:
-            st.error("Please share some details!")
+    st.markdown("### Ready When You Are")
+    st.caption("When you're happy with what you've shared, click below — I'll create your report with care")
+
+    if st.button("Create My Wellness Home Report 🏡", type="primary"):
+        if not client_needs and not specific_input and not locations:
+            st.info("No worries — share just a little and I'll get started. Or try one of the Quick Starts above ❤️")
         else:
-            with st.spinner("Fred is scouting... 🏡"):
+            with st.spinner("Taking my time to craft your perfect report..."):
                 try:
                     structured_inputs = f"""
 User is {buy_or_rent.lower()}. Budget: {budget}.
-Preferred locations: {locations or 'Florida'}.
-Must-haves: {', '.join(must_haves) or 'None'}.
-Deal-breakers: {', '.join(deal_breakers) or 'None'}.
+Preferred locations: {locations or 'Open to suggestions'}.
+Must-haves: {', '.join(must_haves) or 'None specified'}.
+Deal-breakers: {', '.join(deal_breakers) or 'None specified'}.
 Home type: {home_type}.
 Timeline: {timeline}.
-Household: {', '.join(household) or 'None'}.
+Household: {', '.join(household) or 'None specified'}.
 Additional sections: {', '.join(additional_sections) or 'None'}.
 """
 
-                    user_prompt = f"{structured_inputs}\nUser vision: {client_needs}\n"
+                    user_prompt = f"{structured_inputs}\nUser's thoughts: {client_needs}\n"
                     if specific_input:
                         user_prompt += f"Specific to analyze: {specific_input}\n"
 
                     messages = [
-                        {"role": "system", "content": st.session_state.fred_personality_prompt},
+                        {"role": "system", "content": st.session_state.fred_report_prompt},
                         {"role": "user", "content": user_prompt}
                     ]
 
@@ -454,38 +455,48 @@ Additional sections: {', '.join(additional_sections) or 'None'}.
                     enriched_report = enrich_report(report_text, locations or "Florida")
                     full_report = add_images_to_report(enriched_report, locations or "Florida", client_needs)
 
-                    st.success("Your Wellness Home Report is ready!")
-                    st.markdown(full_report)
-
                     st.session_state.full_report_for_email = full_report
                 except Exception as e:
-                    st.error(f"Error: {str(e)}")
+                    st.error(f"Something went wrong: {str(e)}. Please try again.")
 
-    # EMAIL FORM
+    # PERSISTENT FULL REPORT DISPLAY
     if "full_report_for_email" in st.session_state:
+        st.markdown("<div id='report-anchor'></div>", unsafe_allow_html=True)
+        st.markdown("### Your Personalized Wellness Home Report 🏡")
+        st.caption("Made just for you — with care")
+        st.markdown(st.session_state.full_report_for_email)
+
+        # EMAIL FORM
         with st.form("email_form"):
-            st.markdown("### Get a Copy of the Full Report Emailed")
+            st.markdown("### Want a copy emailed?")
+            st.caption("Perfect for saving or sharing with family")
             email = st.text_input("Your Email", placeholder="you@example.com")
             phone = st.text_input("Phone (optional)")
-            submitted = st.form_submit_button("📧 Send My Full Report")
+            submitted = st.form_submit_button("📧 Send My Report")
             if submitted:
                 if not email:
-                    st.error("Email required!")
+                    st.error("Email needed to send your report")
                 else:
                     report_to_send = st.session_state.full_report_for_email
-                    email_body = f"""Hi {st.session_state.user_name or 'friend'},
+                    email_body = f"""Hi {st.session_state.user_name or 'there'},
 
-Thank you for exploring with Fred at LBL Lifestyle Solutions.
-Here's your COMPLETE personalized wellness home report:
+Thank you for trusting me with your wellness home search at LBL Lifestyle Solutions.
+
+Here is your complete, personalized Wellness Home Report — crafted with care to help you find a home that truly supports a longer, healthier, and more joyful life.
+
 {report_to_send}
 
-Best,
-Fred & the LBL Team 🏡"""
+I'm always here if you'd like to discuss any part of this, refine your vision, or meet the rest of the team (Greg for fitness, Zoey for health, Nora for nutrition).
+
+To your health and home,
+
+Fred & the LBL Team 🏡❤️
+"""
                     data = {
-                        "from": "reports@lbllifestyle.com",
+                        "from": "fred@lbllifestyle.com",
                         "to": [email],
                         "cc": [YOUR_EMAIL],
-                        "subject": f"{st.session_state.user_name or 'Client'}'s LBL Wellness Home Report",
+                        "subject": f"{st.session_state.user_name or 'Your'} Personalized Wellness Home Report",
                         "text": email_body
                     }
                     headers = {
@@ -495,17 +506,17 @@ Fred & the LBL Team 🏡"""
                     try:
                         response = requests.post("https://api.resend.com/emails", json=data, headers=headers)
                         if response.status_code == 200:
-                            st.success(f"Full report sent to {email}! 🎉")
+                            st.success(f"Report sent to {email}! Check your inbox 🎉")
                             st.balloons()
                         else:
-                            st.error(f"Send failed: {response.text}")
-                    except Exception as e:
-                        st.error(f"Send error: {str(e)}")
+                            st.error("Send failed — please try again")
+                    except:
+                        st.error("Connection issue — please try again")
 
     # CHAT SECTION
     st.markdown("<div id='chat-anchor'></div>", unsafe_allow_html=True)
-    st.markdown("### Have a follow-up question? Chat with Fred! 🏡✨")
-    st.caption("Ask about any part of your report or refine your search.")
+    st.markdown("### Ready to talk about your report?")
+    st.caption("Ask me anything — I'm here to help refine or explain")
 
     for msg in st.session_state.chat_history[agent_key]:
         if msg["role"] == "user":
@@ -513,14 +524,14 @@ Fred & the LBL Team 🏡"""
         else:
             st.chat_message("assistant").write(msg["content"])
 
-    if prompt := st.chat_input("Ask Fred a question... 🔍"):
+    if prompt := st.chat_input("Chat with Fred..."):
         st.session_state.chat_history[agent_key].append({"role": "user", "content": prompt})
         st.chat_message("user").write(prompt)
 
-        with st.spinner("Fred is thinking..."):
+        with st.spinner("Thinking..."):
             try:
                 messages = [
-                    {"role": "system", "content": st.session_state.fred_personality_prompt},
+                    {"role": "system", "content": st.session_state.fred_chat_prompt},
                     *st.session_state.chat_history[agent_key]
                 ]
 
@@ -535,14 +546,7 @@ Fred & the LBL Team 🏡"""
                 st.session_state.chat_history[agent_key].append({"role": "assistant", "content": reply})
                 st.chat_message("assistant").write(reply)
             except Exception as e:
-                st.error("Sorry, trouble connecting. Try again.")
-
-        st.markdown("""
-        <script>
-            const chatAnchor = document.getElementById('chat-anchor');
-            if (chatAnchor) chatAnchor.scrollIntoView({ behavior: 'smooth' });
-        </script>
-        """, unsafe_allow_html=True)
+                st.error("Trouble connecting — try again")
 
         st.rerun()
 
