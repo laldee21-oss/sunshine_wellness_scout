@@ -1,7 +1,6 @@
 import streamlit as st
 import requests
 from openai import OpenAI
-from geopy.geocoders import Nominatim
 import re
 
 with st.sidebar:
@@ -16,26 +15,27 @@ WALKSCORE_API_KEY = st.secrets.get("WALKSCORE_API_KEY", "")
 AIRNOW_API_KEY = st.secrets.get("AIRNOW_API_KEY", "")
 client = OpenAI(api_key=XAI_API_KEY, base_url="https://api.x.ai/v1")
 MODEL_NAME = "grok-4-1-fast-reasoning"
-geolocator = Nominatim(user_agent="lbl_fred_scout")
 
-# THEMED WELLNESS IMAGES (safe, beautiful, no neighborhood-specific)
+# THEMED WELLNESS IMAGES (safe, beautiful, no duplicates)
 WELLNESS_THEMES = [
-    "sunset nature trail wellness walk landscape",
+    "sunset nature trail wellness walk landscape USA",
     "peaceful home garden natural light sunset wellness",
-    "yoga outdoors nature park trail sunset",
+    "yoga outdoors nature park trail sunset USA",
     "serene suburban home green landscape wellness",
     "family walking trail nature wellness sunset",
     "outdoor meditation garden wellness home sunset",
     "tranquil backyard nature wellness sunset Florida"
 ]
 
+seen_image_urls = set()  # Global to prevent duplicates across report
+
 def fetch_thematic_image():
+    global seen_image_urls
     if not PEXELS_API_KEY:
         return None
     headers = {"Authorization": PEXELS_API_KEY}
     url = "https://api.pexels.com/v1/search"
     
-    seen_urls = set()
     for query in WELLNESS_THEMES:
         params = {
             "query": query,
@@ -49,8 +49,8 @@ def fetch_thematic_image():
                 data = response.json()
                 for photo in data.get("photos", []):
                     img_url = photo["src"]["large2x"]
-                    if img_url not in seen_urls:
-                        seen_urls.add(img_url)
+                    if img_url not in seen_image_urls:
+                        seen_image_urls.add(img_url)
                         return img_url
         except:
             continue
@@ -73,7 +73,7 @@ def add_thematic_images(report_text):
                 image_count += 1
     return '\n'.join(enhanced_lines)
 
-# ENRICHMENT FUNCTIONS (Walk Score + AirNow, no lat/lon shown)
+# ENRICHMENT (Walk Score + AirNow)
 def get_walk_scores(lat, lon):
     if not WALKSCORE_API_KEY:
         return "Walk Score data unavailable"
@@ -240,8 +240,8 @@ def show():
     </script>
     """, unsafe_allow_html=True)
 
-    # HERO & WELCOME (original restored with "office" feel)
-    st.image("https://i.postimg.cc/MGxQfXtd/austin-distel-h1RW-NFt-Uyc-unsplash.jpg", use_column_width=True)
+    # HERO & WELCOME (original restored with "office")
+    st.image("https://i.postimg.cc/fRms9xv6/tierra-mallorca-rg_J1J8SDEAY-unsplash.jpg", use_column_width=True)
     st.markdown("<h1>Welcome to my office — I’m Fred, your Wellness Home Scout 🏡</h1>", unsafe_allow_html=True)
     st.markdown("**Take your time.** I’m here to help you find (or create) a home that truly supports a longer, healthier, more joyful life — whether buying, renting, or just exploring ideas.")
     st.caption("No rush. The more you share, the better I can help ❤️")
@@ -277,21 +277,19 @@ def show():
     st.warning("Reports are AI-generated based on public data – verify with local sources.")
 
     # USER NAME
-    st.session_state.user_name = st.text_input("What’s your name? (so I can make this truly personal)", value=st.session_state.get("user_name", ""), help="I'll use your name in the report and when we chat ❤️")
+    st.session_state.user_name = st.text_input("What’s your name? ✏️ (so I can make this truly personal)", value=st.session_state.get("user_name", ""), help="I'll use your name in the report and when we chat ❤️")
 
-    # QUICK STARTS
-    with st.expander("Need Inspiration? Try a Quick Start"):
-        st.caption("These are gentle examples — click any to see what a report looks like")
-        col1, col2, col3 = st.columns(3)
-        with col1:
-            if st.button("Peaceful neighborhoods near trails"):
-                st.session_state.quick_start = "Peaceful neighborhoods near trails in Florida with good air quality"
-        with col2:
-            if st.button("Wellness-friendly rentals"):
-                st.session_state.quick_start = "Wellness-friendly rentals in Sarasota or Naples"
-        with col3:
-            if st.button("Modify my current home"):
-                st.session_state.quick_start = "How to modify my current home for aging in place and longevity"
+    # QUICK STARTS (restored as inspirational examples)
+    with st.expander("Need Inspiration? Here are popular ways users get started"):
+        st.caption("These are examples of what Fred can do — feel free to use them as ideas!")
+        st.markdown("""
+- Find quiet neighborhoods with trails near Tampa
+- Suggest homes with gym space under $600k
+- Compare walkability in Asheville vs Sarasota
+- Modify my current home for aging in place
+- Best wellness-friendly rentals in Florida
+- Homes with natural light and garden space for healthy living
+        """)
 
     # FORM
     st.markdown("### Take Your Time — Share Your Vision")
@@ -323,35 +321,46 @@ def show():
         ["Near trails/parks", "Quiet/low noise", "Good air quality", "Walkable to shops", "Home gym space", "Natural light", "Low EMF potential", "Community amenities", "Near healthy grocery", "Garden/yard space"]
     )
 
+    # Optional comment box under must-haves
+    must_haves_notes = st.text_area("Anything else about your must-haves?", placeholder="e.g., 'I need space for a home yoga studio' or 'Important to have a fenced yard for dogs'", height=100)
+
     st.caption("And what would you rather avoid?")
     deal_breakers = st.multiselect(
         "Deal-Breakers",
         ["Busy roads/high traffic", "High crime area", "Poor air quality", "No nature access", "Strict HOA", "Flood zone", "Far from medical facilities", "Industrial area"]
     )
 
+    # Optional comment box under deal-breakers
+    deal_breakers_notes = st.text_area("Anything else about deal-breakers?", placeholder="e.g., 'No homes near airports' or 'Avoid areas with poor cell service'", height=100)
+
     home_type_options = ["Single family home", "Condo/Townhouse", "55+ community", "Villa/Patio home", "No preference"]
     if "Rent" in buy_or_rent:
         home_type_options.insert(0, "Apartment")
     home_type = st.selectbox("Home Type Preference", home_type_options, help="I'll focus on what fits your life best")
 
+    # Optional comment box under home type
+    home_type_notes = st.text_area("Anything else about home type?", placeholder="e.g., 'Prefer single-level for aging in place' or 'Need a guest room for family visits'", height=100)
+
     timeline = st.select_slider("When are you thinking of making a move?", options=["Exploring now", "3–6 months", "6–12 months", "1+ years"], value="Exploring now")
 
     household = st.multiselect("Who is this home for? (select all that apply)", ["Solo", "Couple", "Family with kids", "Multi-generational", "Pets"])
 
-    st.caption("Want deeper insights? These three are always included — choose more if you'd like:")
+    # Optional comment box under household
+    household_notes = st.text_area("Anything else about your household?", placeholder="e.g., 'We have two large dogs' or 'Multi-generational with elderly parents'", height=100)
+
+    st.caption("These three are always included — choose more if you'd like deeper insights:")
     additional_sections = st.multiselect(
         "Extra Topics for Your Report",
-        ["Cost of Living & Financial Breakdown", "Climate & Seasonal Wellness Tips", "Transportation & Daily Convenience", "Future-Proofing for Aging in Place", "Sample Daily Wellness Routine in This Area", "Top Property Recommendations"]
+        ["Cost of Living & Financial Breakdown", "Climate & Seasonal Wellness Tips", "Transportation & Daily Convenience", "Future-Proofing for Aging in Place", "Sample Daily Wellness Routine in This Area", "Top Property Recommendations"],
+        default=[],
+        help="Wellness/Outdoor Highlights, Healthcare Access & Longevity Metrics, and Community & Social Wellness are always in your report"
     )
 
     client_needs = st.text_area(
         "Tell me anything else about your vision",
-        value=st.session_state.get("quick_start", ""),
-        placeholder="Just talk to me like you would a friend. The more you share, the better I can help ❤️",
+        placeholder="We're a couple in our early 50s with two dogs, love morning walks, yoga, and cooking healthy meals. Looking for a quiet, nature-filled neighborhood with trails and parks nearby, a home with space for a yoga/meditation room, natural light, and a garden. Prefer single-level or main-floor master for aging in place. Budget up to $750k. Interested in Florida, North Carolina, or Colorado. We value community events, farmers markets, and low stress — no busy highways please!",
         height=150
     )
-    if "quick_start" in st.session_state:
-        del st.session_state.quick_start
 
     with st.expander("🔍 Have a specific property, neighborhood, or listing in mind?"):
         st.caption("Paste it here and I'll evaluate it directly for wellness fit")
@@ -381,6 +390,7 @@ Home type: {home_type}.
 Timeline: {timeline}.
 Household: {', '.join(household) or 'None'}.
 Extra sections: {', '.join(additional_sections) or 'None'}.
+Additional notes: Must-haves: {must_haves_notes} Deal-breakers: {deal_breakers_notes} Home type: {home_type_notes} Household: {household_notes}
 """
 
                     user_prompt = f"{structured_inputs}\nUser's thoughts: {client_needs}\n"
@@ -391,16 +401,17 @@ Extra sections: {', '.join(additional_sections) or 'None'}.
 You are Fred, the Wellness Home Scout. Write the main report in a warm, professional, detailed, and deeply aspirational tone — like a trusted longevity advisor sharing a beautiful blueprint.
 Use flowing paragraphs of 5–7 sentences. Paint vivid pictures of the lifestyle.
 Always include:
-- A Longevity Score (1–10) at the top with brief explanation
-- Top 5 Neighborhoods/Suburbs with longevity reasoning
-- Top 5 Must-Have Features for each
-- Wellness/Outdoor Highlights
-- Healthcare Access & Longevity Metrics
-- Community & Social Wellness
+- Introduction (5-6 sentences)
+- Longevity Score (1–10) with brief explanation
+- Top 5 Neighborhoods/Suburbs with longevity reasoning (5-8 sentences each)
+- Top 5 Must-Have Features (5-6 sentences each)
+- Wellness/Outdoor Highlights (6-10 sentences)
+- Healthcare Access & Longevity Metrics (4-6 sentences)
+- Community & Social Wellness (4-6 sentences)
 - If extra sections selected, include them
-- One Thing to Watch (gentle note on potential risks)
+- One Thing to Watch (gentle note)
 - Next Steps with the LBL Team teaser
-Do not include coordinates.
+Use clear, professional language. No bullets except for light reference.
 """
 
                     messages = [
@@ -411,7 +422,7 @@ Do not include coordinates.
                     response = client.chat.completions.create(
                         model=MODEL_NAME,
                         messages=messages,
-                        max_tokens=2500,
+                        max_tokens=3000,
                         temperature=0.7
                     )
                     report_text = response.choices[0].message.content
@@ -421,7 +432,7 @@ Do not include coordinates.
 
                     st.session_state.full_report_for_email = full_report
 
-                    # Report summary for chat
+                    # Report summary for chat (hidden)
                     report_summary = f"""
 User's name: {st.session_state.user_name or 'friend'}
 Seeking: {buy_or_rent.lower()}
@@ -430,6 +441,7 @@ Preferred locations: {locations or 'open'}
 Must-haves: {', '.join(must_haves) or 'none'}
 Top neighborhoods: (from report)
 Key themes: wellness, nature access, quiet, clean air
+Longevity Score and main points from report
 """
                     st.session_state.report_summary = report_summary
                 except Exception as e:
@@ -498,10 +510,10 @@ Fred & the LBL Team 🏡❤️
     st.markdown("### Ready to talk about your report?")
     st.caption("Ask me anything — I'm here to help refine or explain")
 
-    # Inject report summary once
+    # Inject report summary once (hidden)
     if "report_summary" in st.session_state:
         if not any(m["role"] == "system" and "report summary" in m["content"].lower() for m in st.session_state.chat_history[agent_key]):
-            st.session_state.chat_history[agent_key].insert(0, {"role": "system", "content": f"Report summary for reference: {st.session_state.report_summary}"})
+            st.session_state.chat_history[agent_key].insert(0, {"role": "system", "content": st.session_state.report_summary})
 
     for msg in st.session_state.chat_history[agent_key]:
         if msg["role"] == "user":
